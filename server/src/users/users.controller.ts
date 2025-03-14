@@ -39,4 +39,16 @@ export class UsersController {
       throw new BadRequestException(error.message);
     }
   }
+  //function update user info 
+  @Patch('/update')
+  @ApiOperation({ summary: 'Update a user' })
+  @ApiResponse({status: 200, description:'User successfully update info'})
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  async update(@Body(new ValidationPipe()) updateUserDto: UpdateUserDto){
+    try {
+      return this.usersService.update(updateUserDto)
+    } catch (error) {
+      throw new BadRequestException(error.message)
+    }
+  }
 }
