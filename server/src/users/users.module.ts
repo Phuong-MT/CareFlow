@@ -5,9 +5,13 @@ import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService, ConfigModule } from '@nestjs/config';
+import { PassportModule } from '@nestjs/passport';
+import { LocalStrategy } from './passport/local.strategy';
+import { JwtStrategy } from './passport/jwt.strategy';
 
 @Module({
   imports: [SequelizeModule.forFeature([User]),
+  PassportModule.register({ defaultStrategy: 'jwt' }),
   JwtModule.registerAsync({
     imports: [ConfigModule],
       inject: [ConfigService],
@@ -21,6 +25,6 @@ import { ConfigService, ConfigModule } from '@nestjs/config';
     }),
   ],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [LocalStrategy, UsersService, JwtStrategy],
 })
 export class UsersModule {}

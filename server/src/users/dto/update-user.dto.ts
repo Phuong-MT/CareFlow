@@ -3,11 +3,6 @@ import { IsOptional, IsString,IsNotEmpty } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class UpdateUserDto {
-  @ApiProperty({ example: 1, description: 'User ID' })
-  @IsString()
-  @IsNotEmpty()
-  id: string;
-
   @ApiProperty({ example: 'John Doe', description: 'User name' })
   @IsOptional()
   @IsString()

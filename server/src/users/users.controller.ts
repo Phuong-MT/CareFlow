@@ -1,19 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, BadRequestException, UseGuards, Request  } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto, loginUser } from './dto/create-user.dto';
+import { CreateUserDto} from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ValidationPipe } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { userInfo } from 'os';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiUnauthorizedResponse} from '@nestjs/swagger';
+import { LocalAuthGuard } from './passport/local-auth.guard';
+import { JwtAuthGuard } from './passport/jwt-auth.guard';
+import { ERROR_TYPE, transformError } from 'src/common/config.errors';
 
 @ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-  @Get('/hello')
-  getHello(): string {
-    return this.usersService.getHello();
-  }
   // register function.
   @Post('/register')
   @ApiOperation({ summary: 'Register a new user' })
@@ -30,23 +28,54 @@ export class UsersController {
   // login function.
   @Post('/login')
   @ApiOperation({ summary: 'Login a user' })
-  @ApiResponse({ status: 200, description: 'User successfully logged in' })
-  @ApiResponse({ status: 400, description: 'Validation error' })
-  async login(@Body(new ValidationPipe()) userInfo: loginUser) {
+  @ApiResponse({ status: 201, description: 'User successfully logged in' })
+  @ApiUnauthorizedResponse({status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string', example: 'user@example.com' },
+        password: { type: 'string', example: 'password123' },
+      },
+      required: ['email', 'password'],
+    },
+  })
+  @UseGuards(LocalAuthGuard)
+  async login(@Request() req: any) {
     try {
-      return await this.usersService.login(userInfo);
+      return await this.usersService.login(req.user);
     } catch (error) {
       throw new BadRequestException(error.message);
     }
   }
   //function update user info 
   @Patch('/update')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Update a user' })
   @ApiResponse({status: 200, description:'User successfully update info'})
   @ApiResponse({ status: 400, description: 'Validation error' })
-  async update(@Body(new ValidationPipe()) updateUserDto: UpdateUserDto){
+  async update(@Request() req:any,@Body(new ValidationPipe()) updateUserDto: UpdateUserDto){
     try {
-      return this.usersService.update(updateUserDto)
+      if(!req.user.id){
+        throw new BadRequestException(
+                transformError(
+                  'User',''
+                ),
+              );
+      }
+      return this.usersService.update(req.user.id, updateUserDto)
+    } catch (error) {
+      throw new BadRequestException(error.message)
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/profile')
+  async getProfile(@Request() req) { 
+    try {
+      return await this.usersService.findId(req.user.id);
     } catch (error) {
       throw new BadRequestException(error.message)
     }
