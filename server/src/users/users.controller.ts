@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, BadRequestException, UseGuards, Request  } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, BadRequestException, UseGuards, Request, UseFilters, HttpException  } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto} from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -7,6 +7,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiUnauthorizedResponse} f
 import { LocalAuthGuard } from './passport/local-auth.guard';
 import { JwtAuthGuard } from './passport/jwt-auth.guard';
 import { ERROR_TYPE, transformError } from 'src/common/config.errors';
+import { JwtRefreshGuard } from './passport/refresh-jwt-auth.guard';
 
 @ApiTags('Users')
 @Controller('users')
@@ -78,6 +79,22 @@ export class UsersController {
       return await this.usersService.findId(req.user.id);
     } catch (error) {
       throw new BadRequestException(error.message)
+    }
+  }
+  // refresh token 
+  @UseGuards(JwtRefreshGuard)
+  @Get('/refresh-token')
+  @ApiResponse({ status: 200,
+    example:{
+        access_token:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZmMDZkZjRhLWMyZWUtNGJmMy04ODJlLTlhMGY2ZmFkZjI4ZSIsImVtYWlsIjoiam9obi5kb2VAZXhhbXBsZS5jb20iLCJpYXQiOjE3NDIyNzcxMzIsImV4cCI6MTc0MjI3NzE5Mn0.dAmk3rz4FF0z_SYx6vCZlL_1X7AEqDiHcJdtR8R8R3A'
+    }
+  })
+  @ApiResponse({ status: 419})
+  async refreshToken(@Request() req) {
+    try {
+      return await this.usersService.refreshToken(req.user);
+    } catch (error) {
+      throw new BadRequestException('Session Expired');
     }
   }
 }

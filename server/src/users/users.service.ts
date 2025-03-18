@@ -7,11 +7,13 @@ import { transformError, ERROR_TYPE } from '../common/config.errors';
 import { hashPassword, comparePassword} from '../utils/helper';
 import { JwtService } from '@nestjs/jwt';
 import { v4 } from 'uuid';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
   constructor(@InjectModel(User) private userModel: typeof User,
-              private jwtService: JwtService          
+              private jwtService: JwtService,
+              private configService: ConfigService         
 ) {}
   getHello(): string {
     return 'hello';
@@ -31,7 +33,11 @@ export class UsersService {
     const hashedPassword = await hashPassword(password);
     const response = await this.userModel.create({ name, email, password: hashedPassword, id: v4()});
     const token = this.jwtService.sign({id : response.id, email : response.email})
-    return {access_token : token}
+    const refresh_token = this.jwtService.sign({id: response.id, email: response.email},{
+      secret: this.configService.get<string>('SECRET'),
+      expiresIn: this.configService.get<string>('EXP_IN_REFRESH_TOKEN')
+  })
+    return {access_token : token, refresh_token}
   }
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.userModel.findOne({where: {email}});
@@ -47,7 +53,11 @@ export class UsersService {
   // login function.
   async login(user: any){
     return {
-     access_token : this.jwtService.sign({id: user.id, email: user.email})
+     access_token : this.jwtService.sign({id: user.id, email: user.email}),
+     refresh_token : this.jwtService.sign({id: user.id, email: user.email},{
+      secret: this.configService.get<string>('SECRET'),
+      expiresIn: this.configService.get<string>('EXP_IN_REFRESH_TOKEN')
+  })
     };
   }
   //function update user info
@@ -83,5 +93,26 @@ export class UsersService {
       );
     }
     return response;
+  }
+  //refresh token 
+  async refreshToken(user: any){
+    const id = user.id;
+    if(!id){
+      throw new BadRequestException('id khong ton tai');
+    }
+    const userid  = this.userModel.findOne({
+      where: {id},
+      attributes:['id'],
+    })
+    if(!userid){
+      throw new BadRequestException(
+        transformError(
+          'id', 
+          ERROR_TYPE.NOT_FOUND,
+        )
+      )
+    }
+    const access_token = this.jwtService.sign({id: user.id, email : user.email});
+    return {access_token}
   }
 }
