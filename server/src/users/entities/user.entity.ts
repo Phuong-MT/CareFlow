@@ -1,4 +1,5 @@
-import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, HasMany } from 'sequelize-typescript';
+import { Justit } from 'src/just-it/entities/just-it.entity';
 
 @Table({ tableName: 'users', timestamps: true, createdAt: 'created_at', updatedAt: false })
 export class User extends Model {
@@ -19,4 +20,6 @@ export class User extends Model {
 
   @Column({ type: DataType.STRING})
   address: string;
+  @HasMany(() => Justit) // Một User có nhiều JustIt
+  justit: [];
 }

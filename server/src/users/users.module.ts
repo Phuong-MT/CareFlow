@@ -9,9 +9,11 @@ import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './passport/local.strategy';
 import { JwtStrategy } from './passport/jwt.strategy';
 import { JwtRefreshStrategy } from './passport/refresh-jwt-strategy';
+import { JustItModule } from 'src/just-it/just-it.module';
+import { Justit } from 'src/just-it/entities/just-it.entity';
 
 @Module({
-  imports: [SequelizeModule.forFeature([User]),
+  imports: [SequelizeModule.forFeature([User, Justit]),
   PassportModule.register({}),
   JwtModule.registerAsync({
     imports: [ConfigModule],
@@ -19,13 +21,15 @@ import { JwtRefreshStrategy } from './passport/refresh-jwt-strategy';
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get('JWT_SECRET') || 'secretKey',
         signOptions: {
-          expiresIn: '30s'
+          expiresIn: '3600s'
         },
         global: true,
       }),
     }),
+    JustItModule
   ],
   controllers: [UsersController],
   providers: [LocalStrategy, UsersService, JwtStrategy, JwtRefreshStrategy],
+  exports:[SequelizeModule]
 })
 export class UsersModule {}

@@ -9,7 +9,7 @@ export class JwtRefreshGuard extends AuthGuard('jwt-refresh') {
 
   handleRequest(err, user, info) {
     if (err || !user) {
-      throw new HttpException('Refresh toke Expired', 419)
+      throw new UnauthorizedException('Refresh toke Expired')
     }
     return user;
   }

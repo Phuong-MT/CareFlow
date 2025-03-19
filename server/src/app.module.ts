@@ -6,6 +6,8 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { ConfigService } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
+import {Justit} from './just-it/entities/just-it.entity'
+import { JustItModule } from './just-it/just-it.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -22,12 +24,13 @@ import { User } from './users/entities/user.entity';
         username: configService.get('DB_USER'),
         password: configService.get('DB_PASS'),
         database: configService.get('DB_NAME'),
-        models: [User],
+        models: [User, Justit],
         autoLoadModels: true,
         synchronize: true,
       }),
     }),
     UsersModule,
+    JustItModule,
   ],
   controllers: [AppController],
   providers: [AppService],

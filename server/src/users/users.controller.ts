@@ -53,6 +53,7 @@ export class UsersController {
   }
   //function update user info 
   @Patch('/update')
+  @ApiOperation({ summary: '' })
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Update a user' })
   @ApiResponse({status: 200, description:'User successfully update info'})
@@ -73,7 +74,10 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get profile a user' })
   @Get('/profile')
+  @ApiResponse({status: 200, description:'Get profile a user'})
+  @ApiResponse({ status: 401, description: 'Validation error' })
   async getProfile(@Request() req) { 
     try {
       return await this.usersService.findId(req.user.id);
@@ -82,19 +86,30 @@ export class UsersController {
     }
   }
   // refresh token 
-  @UseGuards(JwtRefreshGuard)
   @Get('/refresh-token')
+  @UseGuards(JwtRefreshGuard)
+  @ApiOperation({ summary: 'refresh-token' })
   @ApiResponse({ status: 200,
     example:{
         access_token:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZmMDZkZjRhLWMyZWUtNGJmMy04ODJlLTlhMGY2ZmFkZjI4ZSIsImVtYWlsIjoiam9obi5kb2VAZXhhbXBsZS5jb20iLCJpYXQiOjE3NDIyNzcxMzIsImV4cCI6MTc0MjI3NzE5Mn0.dAmk3rz4FF0z_SYx6vCZlL_1X7AEqDiHcJdtR8R8R3A'
     }
   })
-  @ApiResponse({ status: 419})
+  @ApiResponse({ status: 419, description:'Refresh toke Expired'})
   async refreshToken(@Request() req) {
     try {
       return await this.usersService.refreshToken(req.user);
     } catch (error) {
       throw new BadRequestException('Session Expired');
     }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/logout')
+  async logout(@Request() req: any){
+      try {
+        return this.usersService.logout(req.user.id, req.user.jit);
+      } catch (error) {
+        throw new  BadRequestException()
+      }
   }
 }

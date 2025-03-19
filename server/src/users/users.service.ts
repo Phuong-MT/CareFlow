@@ -8,12 +8,14 @@ import { hashPassword, comparePassword} from '../utils/helper';
 import { JwtService } from '@nestjs/jwt';
 import { v4 } from 'uuid';
 import { ConfigService } from '@nestjs/config';
+import { Justit } from 'src/just-it/entities/just-it.entity';
 
 @Injectable()
 export class UsersService {
   constructor(@InjectModel(User) private userModel: typeof User,
               private jwtService: JwtService,
-              private configService: ConfigService         
+              private configService: ConfigService,
+               @InjectModel(Justit) private jitModel: typeof Justit       
 ) {}
   getHello(): string {
     return 'hello';
@@ -32,8 +34,9 @@ export class UsersService {
     }
     const hashedPassword = await hashPassword(password);
     const response = await this.userModel.create({ name, email, password: hashedPassword, id: v4()});
-    const token = this.jwtService.sign({id : response.id, email : response.email})
-    const refresh_token = this.jwtService.sign({id: response.id, email: response.email},{
+    const jit = v4();
+    const token = this.jwtService.sign({id : response.id, email : response.email, jit})
+    const refresh_token = this.jwtService.sign({id: response.id, email: response.email, jit},{
       secret: this.configService.get<string>('SECRET'),
       expiresIn: this.configService.get<string>('EXP_IN_REFRESH_TOKEN')
   })
@@ -52,9 +55,10 @@ export class UsersService {
   }
   // login function.
   async login(user: any){
+    const jit = v4();
     return {
-     access_token : this.jwtService.sign({id: user.id, email: user.email}),
-     refresh_token : this.jwtService.sign({id: user.id, email: user.email},{
+     access_token : this.jwtService.sign({id: user.id, email: user.email, jit}),
+     refresh_token : this.jwtService.sign({id: user.id, email: user.email, jit},{
       secret: this.configService.get<string>('SECRET'),
       expiresIn: this.configService.get<string>('EXP_IN_REFRESH_TOKEN')
   })
@@ -112,7 +116,16 @@ export class UsersService {
         )
       )
     }
-    const access_token = this.jwtService.sign({id: user.id, email : user.email});
+    const access_token = this.jwtService.sign({id: user.id, email : user.email, jit: user.jit});
     return {access_token}
+  }
+
+  //logout function
+  async logout(id: string, jit: string){
+    if(!id || !jit){
+      throw new BadRequestException('id khong ton tai');
+    }
+    await this.jitModel.create({id, jit})
+    return "Logged out successfully"
   }
 }
