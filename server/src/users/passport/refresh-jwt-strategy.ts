@@ -30,6 +30,6 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
         if (isRevoked > 0) {
           throw new HttpException('Token has been revoked', 419);
         }
-    return {id: payload.id, email: payload.email, jit: payload.jit};
+    return {id: payload.id, email: payload.email,role: payload.role ,jit: payload.jit};
   }
 }
