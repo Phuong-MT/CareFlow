@@ -2,6 +2,7 @@ import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from 'sequelize
 import { Tenant } from 'src/tenant/entities/tenant.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Location } from 'src/location/entities/location.entity';
+import { QueueEnum } from 'src/common/commonEnum';
 
 @Table({ tableName: 'queues' })
 export class Queue extends Model {
@@ -17,7 +18,7 @@ export class Queue extends Model {
   @Column({ type: DataType.INTEGER, allowNull: false })
   userId: number;
 
-  @Column({ type: DataType.ENUM('waiting', 'being_examined', 'done'), allowNull: false, defaultValue: 'waiting' })
+  @Column({ type: DataType.ENUM(...Object.values(QueueEnum)), allowNull: false, defaultValue: QueueEnum.PENDING})
   status: string;
 
   @Column({ type: DataType.INTEGER, allowNull: false })
