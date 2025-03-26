@@ -7,16 +7,16 @@ import { QueueEnum } from 'src/common/commonEnum';
 @Table({ tableName: 'queues' })
 export class Queue extends Model {
   @ForeignKey(() => Tenant)
-  @Column({ type: DataType.INTEGER, allowNull: false })
-  tenantId: number;
+  @Column({ type: DataType.STRING, allowNull: false })
+  tenantCode: string;
 
   @ForeignKey(() => Location)
   @Column({ type: DataType.INTEGER, allowNull: false })
   locationId: number;
 
   @ForeignKey(() => User)
-  @Column({ type: DataType.INTEGER, allowNull: false })
-  userId: number;
+  @Column({ type: DataType.STRING, allowNull: false })
+  userId: string;
 
   @Column({ type: DataType.ENUM(...Object.values(QueueEnum)), allowNull: false, defaultValue: QueueEnum.PENDING})
   status: string;

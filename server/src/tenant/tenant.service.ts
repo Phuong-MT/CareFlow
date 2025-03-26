@@ -1,26 +1,44 @@
-import { Injectable } from '@nestjs/common';
-import { CreateTenantDto } from './dto/create-tenant.dto';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { Tenant } from 'src/tenant/entities/tenant.entity';
+import { CreateTenantDto} from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
-
+import { ERROR_TYPE, transformError } from 'src/common/config.errors';
 @Injectable()
 export class TenantService {
-  create(createTenantDto: CreateTenantDto) {
-    return 'This action adds a new tenant';
+  constructor(@InjectModel(Tenant) private tenantModel: typeof Tenant) {}
+
+  async create(createTenantDto: CreateTenantDto): Promise<Tenant> {
+    const {tenantCode, name} = createTenantDto
+    const existingTenant = await this.tenantModel.findByPk(tenantCode);
+  if (existingTenant) {
+    throw new BadRequestException( transformError(
+              `tenantCode : ${tenantCode}`, 
+              ERROR_TYPE.EXIST
+            )
+          );
+  }
+    return await this.tenantModel.create({tenantCode, name});
   }
 
-  findAll() {
-    return `This action returns all tenant`;
+  async findAll(): Promise<Tenant[]> {
+    return await this.tenantModel.findAll();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} tenant`;
+  async findOne(tenantCode: string): Promise<Tenant> {
+    const tenant = await this.tenantModel.findByPk(tenantCode);
+    if (!tenant) throw new NotFoundException('Tenant not found');
+    return tenant;
   }
 
-  update(id: number, updateTenantDto: UpdateTenantDto) {
-    return `This action updates a #${id} tenant`;
+  async update(tenantCode: string, updateTenantDto: UpdateTenantDto): Promise<[number]> {
+    return this.tenantModel.update(updateTenantDto, { where: { tenantCode } });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} tenant`;
+  async remove(tenantCode: string): Promise<void> {
+    const tenant = await this.tenantModel.findOne({
+      where : {tenantCode}
+    });
+    await tenant.destroy();
   }
 }

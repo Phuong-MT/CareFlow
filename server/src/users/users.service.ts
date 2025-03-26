@@ -9,20 +9,22 @@ import { JwtService } from '@nestjs/jwt';
 import { v4 } from 'uuid';
 import { ConfigService } from '@nestjs/config';
 import { Justit } from 'src/just-it/entities/just-it.entity';
+import { Tenant } from 'src/tenant/entities/tenant.entity';
 
 @Injectable()
 export class UsersService {
   constructor(@InjectModel(User) private userModel: typeof User,
               private jwtService: JwtService,
               private configService: ConfigService,
-              @InjectModel(Justit) private jitModel: typeof Justit        
+              @InjectModel(Justit) private jitModel: typeof Justit ,
+              @InjectModel(Tenant) private tenantModel: typeof Tenant        
 ) {}
   getHello(): string {
     return 'hello';
   }
 // register function.
   async createUser(createUserDto: CreateUserDto) {
-    const { name, email, password } = createUserDto;
+    const { name, email, password, tenantCode } = createUserDto;
     const user = await this.userModel.findOne({ where: { email } });
     if (user) {
       throw new BadRequestException(
@@ -32,11 +34,22 @@ export class UsersService {
         ),
       );
     }
+    const req = await this.tenantModel.findOne({
+      where: {tenantCode}
+    })
+    if(!req){
+      throw new BadRequestException(
+        transformError(
+          `tenantCode : ${tenantCode}`, 
+          ERROR_TYPE.NOT_FOUND,
+        ),
+      );
+    }
     const hashedPassword = await hashPassword(password);
-    const response = await this.userModel.create({ name, email, password: hashedPassword, id: v4()});
+    const response = await this.userModel.create({ name, email, password: hashedPassword, id: v4(), tenantCode});
     const jit = v4();
-    const token = this.jwtService.sign({id : response.id, email : response.email, jit})
-    const refresh_token = this.jwtService.sign({id: response.id, email: response.email, jit},{
+    const token = this.jwtService.sign({id : response.id, email : response.email, jit, role :  response.role})
+    const refresh_token = this.jwtService.sign({id: response.id, email: response.email, jit, role: response.role},{
       secret: this.configService.get<string>('SECRET'),
       expiresIn: this.configService.get<string>('EXP_IN_REFRESH_TOKEN')
   })
@@ -57,8 +70,8 @@ export class UsersService {
   async login(user: any){
     const jit = v4();
     return {
-      access_token : this.jwtService.sign({id: user.id, email: user.email, jit}),
-      refresh_token : this.jwtService.sign({id: user.id, email: user.email, jit},{
+      access_token : this.jwtService.sign({id: user.id, email: user.email, jit, role: user.role}),
+      refresh_token : this.jwtService.sign({id: user.id, email: user.email, jit, role: user.role},{
       secret: this.configService.get<string>('SECRET'),
       expiresIn: this.configService.get<string>('EXP_IN_REFRESH_TOKEN')
   })
@@ -116,7 +129,8 @@ export class UsersService {
         )
       )
     }
-    const access_token = this.jwtService.sign({id: user.id, email : user.email});
+    const jit = v4()
+    const access_token = this.jwtService.sign({id: user.id, email : user.email, jit, role: user.role});
     return {access_token}
   }
    //logout function

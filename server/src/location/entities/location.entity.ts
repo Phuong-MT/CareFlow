@@ -5,8 +5,8 @@ import { Event } from 'src/event/entities/event.entity';
 @Table({ tableName: 'locations' })
 export class Location extends Model {
   @ForeignKey(() => Tenant)
-  @Column({ type: DataType.INTEGER, allowNull: false })
-  tenantId: number;
+  @Column({ type: DataType.STRING, allowNull: false })
+  tenantCode: string;
 
   @Column({ type: DataType.STRING, allowNull: false })
   name: string;

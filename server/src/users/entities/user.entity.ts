@@ -21,14 +21,14 @@ export class User extends Model {
   status: commonEnum;
    
   @Column({type: DataType.STRING(), defaultValue: RoleEnum.USER})
-  Role: string;
+  role: string;
   
   @Column({type: DataType.INTEGER, defaultValue: 0})
   resetpassword: number;// changer password 
   
   @ForeignKey(() => Tenant)
-  @Column({ type: DataType.INTEGER, allowNull: false })
-  tenantId: number;
+  @Column({ type: DataType.STRING, allowNull: false })
+  tenantCode: string;
 
   @Column({ type: DataType.STRING})
   address: string;

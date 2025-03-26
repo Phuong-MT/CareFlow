@@ -26,7 +26,7 @@ export class CreateUserDto {
   @ApiProperty({
     example: '40ba1bb6-4e44-455b-bd66-36bc222e3497',
   })
-  tentCode: string;
+  tenantCode: string;
 
 
 }

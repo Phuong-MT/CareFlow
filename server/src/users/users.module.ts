@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { User } from '../users/entities/user.entity';
 import { UsersController } from './users.controller';
@@ -11,9 +11,11 @@ import { JwtStrategy } from './passport/jwt.strategy';
 import { JwtRefreshStrategy } from './passport/refresh-jwt-strategy';
 import { JustItModule } from 'src/just-it/just-it.module';
 import { Justit } from 'src/just-it/entities/just-it.entity';
+import { TenantModule } from 'src/tenant/tenant.module';
+import { Tenant } from 'src/tenant/entities/tenant.entity';
 
 @Module({
-  imports: [SequelizeModule.forFeature([User, Justit]),
+  imports: [SequelizeModule.forFeature([User, Justit, Tenant]),
   PassportModule.register({}),
   JwtModule.registerAsync({
     imports: [ConfigModule],
@@ -26,10 +28,11 @@ import { Justit } from 'src/just-it/entities/just-it.entity';
         global: true,
       }),
     }),
-    JustItModule
+    JustItModule,
+    forwardRef(() => TenantModule)
   ],
   controllers: [UsersController],
   providers: [LocalStrategy, UsersService, JwtStrategy, JwtRefreshStrategy],
-  exports:[SequelizeModule]
+  exports:[SequelizeModule, JwtStrategy]
 })
 export class UsersModule {}
