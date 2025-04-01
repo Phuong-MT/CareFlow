@@ -1,5 +1,5 @@
 import {BadRequestException,Injectable,UnauthorizedException} from '@nestjs/common';
-import { CreateUserDto, loginUser } from './dto/create-user.dto';
+import { CreateAdminDto, CreateUserDto, loginUser } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { User } from './entities/user.entity';
@@ -10,6 +10,7 @@ import { v4 } from 'uuid';
 import { ConfigService } from '@nestjs/config';
 import { Justit } from 'src/just-it/entities/just-it.entity';
 import { Tenant } from 'src/tenant/entities/tenant.entity';
+import { RoleEnum } from 'src/common/commonEnum';
 
 @Injectable()
 export class UsersService {
@@ -140,5 +141,23 @@ export class UsersService {
     }
     await this.jitModel.create({id, jit})
     return "Logged out successfully"
+  }
+
+  //account admin 
+  async accountAdmin(createAdminDto : CreateAdminDto, email_superAdmin: string){
+    const { name, email, password } = createAdminDto;
+    const superAdmin = await this.userModel.findOne({ where: {email : email_superAdmin}});
+    const user = await this.userModel.findOne({ where: { email } });
+    if (user) {
+      throw new BadRequestException(
+        transformError(
+          `${email}`, 
+          ERROR_TYPE.EXIST,
+        ),
+      );
+    }
+    const hashedPassword = await hashPassword(password);
+    const response =  this.userModel.create({ name, email, role : RoleEnum.ADMIN,password: hashedPassword, id: v4(), tenantCode: superAdmin.tenantCode});
+    return "created account admin successful"
   }
 }

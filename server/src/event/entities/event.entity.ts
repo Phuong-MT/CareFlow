@@ -15,8 +15,11 @@ export class Event extends Model {
   title: string;
 
   @Column({ type: DataType.DATE, allowNull: false })
-  date: Date;
+  dateStart: Date;
 
+  @Column({ type: DataType.DATE, allowNull: false })
+  dateEnd: Date;
+  
   @BelongsTo(() => Tenant)
   tenant: Tenant;
 

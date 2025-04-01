@@ -1,26 +1,63 @@
-import { Injectable } from '@nestjs/common';
-import { CreateLocationDto } from './dto/create-location.dto';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { Location } from './entities/location.entity';
+import { CreateLocationDto} from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
+import { ERROR_TYPE, transformError } from 'src/common/config.errors';
+import { Tenant } from 'src/tenant/entities/tenant.entity';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class LocationService {
-  create(createLocationDto: CreateLocationDto) {
-    return 'This action adds a new location';
+  constructor(@InjectModel(Location) private locationModel: typeof Location,
+              @InjectModel(Tenant)  private tenantModel : typeof Tenant,
+              @InjectModel(User) private userModel : typeof User
+  ) {}
+
+  async create(createLocationDto: CreateLocationDto): Promise<Location> {
+    const {tenantCode, name, address} = createLocationDto
+    const existingTenant = await this.tenantModel.findOne({
+      where: {tenantCode}
+    });
+     if (!existingTenant) {
+       throw new BadRequestException( transformError(
+                 `tenantCode : ${tenantCode}`, 
+                 ERROR_TYPE.NOT_FOUND
+               )
+             );
+     }
+    return await this.locationModel.create({tenantCode, name,address });
   }
 
-  findAll() {
-    return `This action returns all location`;
+  async findAll(id: string): Promise<Location[]>  {
+    const response = await this.userModel.findByPk(id);
+    return  await this.locationModel.findAll(
+      {
+        where :{
+          tenantCode: response.tenantCode
+        }, 
+        include: [{model: this.tenantModel, attributes: ['name', 'tenantCode']}],
+        attributes:['id','name', 'address',]
+      }
+    );
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} location`;
+  async findOne(id: number): Promise<Location> {
+    const location = await this.locationModel.findByPk(id,
+      {
+        include: [{model : this.tenantModel,  attributes: ['name', 'tenantCode']}]
+      }
+    );
+    if (!location) throw new NotFoundException('Location not found');
+    return location;
   }
 
-  update(id: number, updateLocationDto: UpdateLocationDto) {
-    return `This action updates a #${id} location`;
+  async update(id: number, updateLocationDto: UpdateLocationDto): Promise<[number]> {
+    return this.locationModel.update(updateLocationDto, { where: { id } });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} location`;
+  async remove(id: number): Promise<void> {
+    const location = await this.findOne(id);
+    await location.destroy();
   }
 }

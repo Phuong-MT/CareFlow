@@ -11,6 +11,9 @@ export class Location extends Model {
   @Column({ type: DataType.STRING, allowNull: false })
   name: string;
 
+  @Column({ type : DataType.STRING, allowNull : false})
+  address: string;
+
   @BelongsTo(() => Tenant)
   tenant: Tenant;
 

@@ -1,4 +1,20 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateEventDto } from './create-event.dto';
+import { IsOptional, IsString, IsDate, IsNumber } from 'class-validator';
 
-export class UpdateEventDto extends PartialType(CreateEventDto) {}
+export class UpdateEventDto {
+  @IsOptional()
+  @IsString()
+  title?: string;
+
+  @IsOptional()
+  @IsString()
+  location?: string;
+
+  @IsOptional()
+  @IsDate()
+  date?: Date;
+
+
+  @IsOptional()
+  @IsNumber()
+  locationId?: number;
+}

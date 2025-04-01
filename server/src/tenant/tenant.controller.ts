@@ -33,7 +33,7 @@ export class TenantController {
     return await this.tenantService.findOne(tenantCode);
   }
 
-  @Put(':id')
+  @Put('update/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN, RoleEnum.SUPER_ADMIN)
   async update(@Param('id') id: string, @Body() updateTenantDto: UpdateTenantDto) {

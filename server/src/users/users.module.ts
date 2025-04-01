@@ -13,6 +13,7 @@ import { JustItModule } from 'src/just-it/just-it.module';
 import { Justit } from 'src/just-it/entities/just-it.entity';
 import { TenantModule } from 'src/tenant/tenant.module';
 import { Tenant } from 'src/tenant/entities/tenant.entity';
+import { RolesGuard } from 'src/common/roles.guard';
 
 @Module({
   imports: [SequelizeModule.forFeature([User, Justit, Tenant]),
@@ -32,7 +33,7 @@ import { Tenant } from 'src/tenant/entities/tenant.entity';
     forwardRef(() => TenantModule)
   ],
   controllers: [UsersController],
-  providers: [LocalStrategy, UsersService, JwtStrategy, JwtRefreshStrategy],
-  exports:[SequelizeModule, JwtStrategy]
+  providers: [LocalStrategy, UsersService, JwtStrategy, JwtRefreshStrategy, RolesGuard],
+  exports:[SequelizeModule, JwtStrategy, UsersService, JwtModule]
 })
 export class UsersModule {}

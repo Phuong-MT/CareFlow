@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, BadRequestException, UseGuards, Request, UseFilters, HttpException  } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto} from './dto/create-user.dto';
+import { CreateAdminDto, CreateUserDto} from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ValidationPipe } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiUnauthorizedResponse} from '@nestjs/swagger';
@@ -8,6 +8,9 @@ import { LocalAuthGuard } from './passport/local-auth.guard';
 import { JwtAuthGuard } from './passport/jwt-auth.guard';
 import { ERROR_TYPE, transformError } from 'src/common/config.errors';
 import { JwtRefreshGuard } from './passport/refresh-jwt-auth.guard';
+import { RolesGuard } from 'src/common/roles.guard';
+import { Roles } from 'src/common/roles.decorator';
+import { RoleEnum } from 'src/common/commonEnum';
 
 @ApiTags('Users')
 @Controller('users')
@@ -112,4 +115,12 @@ export class UsersController {
         throw new  BadRequestException()
       }
   }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.SUPER_ADMIN)
+  @Post('/create/admin')
+  async accountAdmin(@Request() req : any,@Body() createAdminDto: CreateAdminDto ){
+    return await this.usersService.accountAdmin(createAdminDto, req.user.email);
+  }
+
 }
