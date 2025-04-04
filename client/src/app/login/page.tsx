@@ -5,8 +5,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {z} from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod';
-import Input from '@/component/ui/Input';
-import Button from '@/component/ui/Button';
+import {Input} from '@/components/ui/input';
+import {Button} from '@/components/ui/button';
 import Link from 'next/link';
 
 // define the schema for validation using zod
@@ -114,7 +114,7 @@ export default function LoginPage() {
               </label>
             </div>
             
-            <Button type="submit" isLoading={loading} variant = "outline" className="w-full">
+            <Button type="submit" variant = "outline" className="w-full">
               Sign in to Account
             </Button>
           </form>

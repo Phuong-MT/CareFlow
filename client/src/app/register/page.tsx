@@ -5,8 +5,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Input from "@/component/ui/Input";
-import Button from "@/component/ui/Button";
+import {Input} from "@/components/ui/input";
+import {Button} from "@/components/ui/button";
 import Link from "next/link";
 
 const registerSchema = z.object({
@@ -91,7 +91,7 @@ export default function RegisterPage() {
           />
 
           {/* Submit Button */}
-          <Button type="submit" isLoading={loading} className="w-full">
+          <Button type="submit"  className="w-full">
             Register
           </Button>
         </form>
