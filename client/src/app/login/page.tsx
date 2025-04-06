@@ -8,7 +8,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import {Input} from '@/components/ui/input';
 import {Button} from '@/components/ui/button';
 import Link from 'next/link';
-
+import { useAppDispatch, useAppSelector } from "@/hooks/config";
+import { login } from '@/store/authSlide';
 // define the schema for validation using zod
 const registerSchema = z.object({
   email: z.string().email('Email không hợp lệ'),
@@ -29,7 +30,8 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-
+  const dispatch = useAppDispatch();
+  const { user, status, error } = useAppSelector((state) => state.user);
   const {
     register,
     handleSubmit,
@@ -42,17 +44,8 @@ export default function LoginPage() {
     console.log(data);
     setLoading(true);
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Invalid credentials');
-      }
-      
-      router.push('/dashboard');
+      await dispatch(login(data));
+      console.log(status);
     } catch (error) {
       console.error(error);
     } finally {
