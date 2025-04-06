@@ -10,6 +10,11 @@ async function bootstrap() {
       whitelist: true
     }),
   );
+  app.enableCors({
+    origin: process.env.NEXT_PUBLIC_CLIENT_URL || 'http://localhost:3030', 
+    methods: 'GET,POST,PUT,DELETE', 
+    allowedHeaders: 'Content-Type, Authorization',
+  });
   const config = new DocumentBuilder()
     .setTitle('CareFlow')
     .setDescription('The careflow API description')
