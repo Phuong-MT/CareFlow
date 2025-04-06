@@ -54,7 +54,14 @@ export class UsersService {
       secret: this.configService.get<string>('SECRET'),
       expiresIn: this.configService.get<string>('EXP_IN_REFRESH_TOKEN')
   })
-    return {access_token : token, refresh_token}
+    return {access_token : token, refresh_token,
+      user:{
+      id: response.id,
+      email: response.email,
+      name: response.name,
+      role: response.role,
+      tenantCode: response.tenantCode,
+    }}
   }
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.userModel.findOne({where: {email}});
@@ -75,7 +82,14 @@ export class UsersService {
       refresh_token : this.jwtService.sign({id: user.id, email: user.email, jit, role: user.role},{
       secret: this.configService.get<string>('SECRET'),
       expiresIn: this.configService.get<string>('EXP_IN_REFRESH_TOKEN')
-  })
+  }),
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        tenantCode: user.tenantCode,
+      }
     };
   }
   //function update user info
