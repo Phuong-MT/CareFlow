@@ -21,9 +21,22 @@ interface User {
     password: string;
   }
   
+  interface RegisterPayload {
+    name: string;
+    email: string;
+    password: string;
+    tenantCode: string; 
+  }
+
   interface LoginResponse {
     access_token: string;
     refresh_token: string;
     user: User;
   }
-  export type { User, AuthState, LoginPayload, LoginResponse };
+
+  export enum UserRole {
+    ADMIN = 'admin',
+    SUPER_ADMIN = 'super_admin',
+    USER = 'user'
+  }
+  export type { User, AuthState, LoginPayload, LoginResponse, RegisterPayload};

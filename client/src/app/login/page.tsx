@@ -9,7 +9,7 @@ import {Input} from '@/components/ui/input';
 import {Button} from '@/components/ui/button';
 import Link from 'next/link';
 import { useAppDispatch, useAppSelector } from "@/hooks/config";
-import { login } from '@/store/authSlide';
+import { login, loginAdmin } from '@/store/authSlide';
 // define the schema for validation using zod
 const registerSchema = z.object({
   email: z.string().email('Email không hợp lệ'),
@@ -28,9 +28,9 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const [loginMode, setLoginMode] = useState<'admin' | 'user'>('admin');
   const { user, status, error } = useAppSelector((state) => state.user);
   const {
     register,
@@ -41,15 +41,25 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    console.log(data);
-    setLoading(true);
     try {
-      await dispatch(login(data));
-      console.log(status);
+      if(loginMode === 'admin'){
+        await dispatch(loginAdmin(data));
+        if(user?.role === 'admin'){
+          router.push('/admin');
+        }
+          else{
+          console.log(error)
+        }
+      }
+      else if( loginMode === 'user'){
+        await dispatch(login(data));
+        if(user?.role === 'user') router.push('/')
+        else{
+          console.log(error)
+        }
+      }
     } catch (error) {
       console.error(error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -64,10 +74,35 @@ export default function LoginPage() {
         <div className="relative bg-white p-8 rounded-2xl shadow-xl backdrop-blur-sm border border-gray-100">
           
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              {loginMode === 'admin' ? 'Admin Login' : 'User Login'}
+            </h1>
             <p className="text-gray-600">
-              Sign in to your CareFlow account
+              Đăng nhập vào tài khoản CareFlow của bạn
             </p>
+          </div>
+
+          <div className="flex justify-center gap-6 mb-6">
+            <label className="flex items-center space-x-2">
+              <input
+                type="radio"
+                value="admin"
+                checked={loginMode === 'admin'}
+                onChange={() => setLoginMode('admin')}
+                className="form-radio text-blue-600"
+              />
+              <span className="text-sm text-gray-700">Admin</span>
+            </label>
+            <label className="flex items-center space-x-2">
+              <input
+                type="radio"
+                value="user"
+                checked={loginMode === 'user'}
+                onChange={() => setLoginMode('user')}
+                className="form-radio text-blue-600"
+              />
+              <span className="text-sm text-gray-700">User</span>
+            </label>
           </div>
           
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

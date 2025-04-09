@@ -1,5 +1,5 @@
 import api from '@/utils/axiosConfig';
-import {LoginPayload} from '@/types/authTypes';
+import {LoginPayload, RegisterPayload} from '@/types/authTypes';
 
 export const apiLogin = async (payload: LoginPayload) => {
   try {
@@ -9,4 +9,45 @@ export const apiLogin = async (payload: LoginPayload) => {
     console.error('Login error:', error);
     throw error;
   }
+}
+export const apiLoginAdmin = async(payload: LoginPayload) =>{
+   try{
+    const response = await api.post('/users/login/admin', payload);
+    return response;
+   }catch(error){
+    console.error('Login error:', error);
+    throw error;
+   }
+}
+
+export const apiRegister = async (payload: RegisterPayload) => {
+  try {
+    console.log(payload)
+    const response = await api.post('/users/register', payload);
+    return response;
+  } catch (error) {
+    console.error('Register error:', error);
+    throw error;
+  }
+}
+
+export const apiLogout = async ()=>{
+  try{
+    const response = await api.post('users/logout');
+    return response;
+  }catch(error){
+    console.error('Logout error:', error);
+    throw error;
+  }
+}
+
+export const apiVerifyToken = async () =>{
+  try{
+    const response = await api.get('users/verify-token');
+    return response;
+  }catch(error){
+    console.error('Verify token error:', error);
+    throw error;
+  }
+  
 }

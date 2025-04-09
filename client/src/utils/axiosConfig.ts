@@ -1,4 +1,6 @@
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { store } from '@/store/stores';
+import type { RootState } from '@/store/stores'
 const baseURL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000';
 
 let isRefreshing = false;
@@ -7,17 +9,17 @@ let failedQueue: {
   reject: (error: AxiosError) => void;
 }[] = [];
 
-// const processQueue = (error: AxiosError | null, token: string | null) => {
-//   failedQueue.forEach(prom => {
-//     if (error) {
-//       prom.reject(error);
-//     } else if (token) {
-//       prom.resolve(token);
-//     }
-//   });
+const processQueue = (error: AxiosError | null, token: string | null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else if (token) {
+      prom.resolve(token);
+    }
+  });
 
-//   failedQueue = [];
-// };
+  failedQueue = [];
+};
 const api = axios.create({
     baseURL,
     headers: {
@@ -26,16 +28,17 @@ const api = axios.create({
 });
 
 // Request Interceptor
-// api.interceptors.request.use(
-//   (config: AxiosRequestConfig): AxiosRequestConfig => {
-//     const accessToken = localStorage.getItem('accessToken');
-//     if (accessToken && config.headers) {
-//       config.headers['Authorization'] = `Bearer ${accessToken}`;
-//     }
-//     return config;
-//   },
-//   (error: AxiosError) => Promise.reject(error)
-// );
+api.interceptors.request.use(
+  (config)=> {
+    const state: RootState = store.getState();
+    const accessToken = state?.user?.access_token;
+    if (accessToken && config.headers) {
+      config.headers['Authorization'] = `Bearer ${accessToken}`;
+    }
+    return config;
+  },
+  (error: AxiosError) => Promise.reject(error)
+);
 
 // Response Interceptor
 // api.interceptors.response.use(
