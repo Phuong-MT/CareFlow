@@ -174,4 +174,22 @@ export class UsersService {
     const response =  this.userModel.create({ name, email, role : RoleEnum.ADMIN,password: hashedPassword, id: v4(), tenantCode: superAdmin.tenantCode});
     return "created account admin successful"
   }
+  // verify token function
+  async verifyToken(id: string){
+   const user = await this.userModel.findByPk(id)
+   if(!user){
+    throw new BadRequestException(
+      transformError(
+        'id',
+        ERROR_TYPE.NOT_FOUND,
+      )
+    )
+   }
+   return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+   }
+  }
 }

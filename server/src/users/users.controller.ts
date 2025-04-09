@@ -54,6 +54,18 @@ export class UsersController {
       throw new BadRequestException(error.message);
     }
   }
+  // admin login function
+  @Post('/login/admin')
+  @UseGuards(LocalAuthGuard, RolesGuard)
+  @Roles(RoleEnum.ADMIN, RoleEnum.SUPER_ADMIN)
+  async loginAdmin(@Request() req: any){
+    try{
+      return await this.usersService.login(req.user);
+    }catch(error){
+      throw new BadRequestException(error.message);
+    }
+  }
+
   //function update user info 
   @Patch('/update')
   @ApiOperation({ summary: '' })
@@ -122,5 +134,15 @@ export class UsersController {
   async accountAdmin(@Request() req : any,@Body() createAdminDto: CreateAdminDto ){
     return await this.usersService.accountAdmin(createAdminDto, req.user.email);
   }
-
+  
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.ADMIN)
+  @Get('/verify-token')
+  async verifyToken(@Request() req: any){
+    try{
+      return this.usersService.verifyToken(req.user.id);
+    }catch(err){
+      throw new BadRequestException(err.message)
+    }
+  }
 }
