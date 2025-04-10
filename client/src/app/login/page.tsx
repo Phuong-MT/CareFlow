@@ -10,6 +10,7 @@ import {Button} from '@/components/ui/button';
 import Link from 'next/link';
 import { useAppDispatch, useAppSelector } from "@/hooks/config";
 import { login, loginAdmin } from '@/store/authSlide';
+import { UserRole } from '@/types/authTypes';
 // define the schema for validation using zod
 const registerSchema = z.object({
   email: z.string().email('Email không hợp lệ'),
@@ -44,7 +45,7 @@ export default function LoginPage() {
     try {
       if(loginMode === 'admin'){
         await dispatch(loginAdmin(data));
-        if(user?.role === 'admin'){
+        if(user?.role === UserRole.ADMIN || user?.role === UserRole.SUPER_ADMIN){
           router.push('/admin');
         }
           else{
@@ -53,7 +54,7 @@ export default function LoginPage() {
       }
       else if( loginMode === 'user'){
         await dispatch(login(data));
-        if(user?.role === 'user') router.push('/')
+        if(user?.role === UserRole.USER) router.push('/')
         else{
           console.log(error)
         }

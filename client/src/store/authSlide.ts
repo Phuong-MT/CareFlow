@@ -42,11 +42,12 @@ export const register = createAsyncThunk<LoginResponse, RegisterPayload, {reject
   }
 });
 
-export const logout = createAsyncThunk('auth/logout',async()=>{
+export const logout = createAsyncThunk('auth/logout',async(_, { rejectWithValue })=>{
   try{
     await apiLogout();
-  }catch(error){
+  }catch(error: any){
     console.error('logout error:', error);
+    return rejectWithValue(error.response?.data?.message);
   }
 })
 

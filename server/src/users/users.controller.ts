@@ -135,8 +135,8 @@ export class UsersController {
     return await this.usersService.accountAdmin(createAdminDto, req.user.email);
   }
   
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.ADMIN)
+  @UseGuards(JwtAuthGuard)
+  // @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.ADMIN)
   @Get('/verify-token')
   async verifyToken(@Request() req: any){
     try{
