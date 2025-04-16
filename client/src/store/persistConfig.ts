@@ -6,7 +6,7 @@ const persistConfig: PersistConfig<any> = {
   key: 'root',
   version: 1,
   storage,
-  whitelist: ['user'], 
+  whitelist: ['user', 'events'], 
 };
 
 export default persistConfig;

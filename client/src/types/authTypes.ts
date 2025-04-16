@@ -3,6 +3,7 @@ interface User {
     email: string;
     name: string;
     role: string;
+    tenantCode: string
   }
   
   interface AuthState {

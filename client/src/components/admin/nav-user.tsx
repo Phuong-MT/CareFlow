@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/sidebar"
 import { useAppDispatch, useAppSelector } from "@/hooks/config"
 import { logout } from "@/store/authSlide"
-
+import { useRouter } from 'next/navigation';
 export function NavUser({
   user,
 }: {
@@ -44,10 +44,12 @@ export function NavUser({
   const { isMobile } = useSidebar()
   const userinfo = useAppSelector(state=> state.user.user)
   const dispatch = useAppDispatch();
+  const router = useRouter();
   const handleLogout = ()=>{
     try{
      console.log('logout function called')
      dispatch(logout())
+     router.push('/');
     }catch(error){
       console.error("logout error:", error);
     }

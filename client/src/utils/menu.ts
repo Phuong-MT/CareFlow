@@ -41,12 +41,12 @@ export const  MenuSidebar = {
       isActive: true,
       items: [
         {
-          title: "History",
+          title: "event",
           url: "/events",
         },
         {
-          title: "Starred",
-          url: "#",
+          title: "analytics",
+          url: "/analys",
         },
         {
           title: "Settings",
