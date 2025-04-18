@@ -10,9 +10,10 @@ import {
   } from '@nestjs/websockets';
   import { Server, Socket } from 'socket.io';
   import { Logger } from '@nestjs/common';
-
-  @WebSocketGateway({
-    cors: process.env.NEXT_PUBLIC_CLIENT_URL || 'https://localhost:3000',
+  import { Data } from './type';
+  @WebSocketGateway(3002,{
+    // cors: process.env.NEXT_PUBLIC_CLIENT_URL || 'https://localhost:3000',
+    cors: '*'
   })
   export class SocketGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
@@ -32,27 +33,79 @@ import {
       this.logger.log(`Client disconnected: ${client.id}`);
     }
   
+    // @SubscribeMessage('join_room')
+    // async handleJoinRoom(
+    //   @ConnectedSocket() client: Socket,
+    //   @MessageBody() eventCode: string,
+    // ) {
+    //   await client.join(eventCode);
+    //   this.logger.log(`Client ${client.id} joined room: ${eventCode}`);
+  
+    //   return { success: true, message: `Joined room ${eventCode}` };
+    // }
+  
+    // @SubscribeMessage('leave_room')
+    // async handleLeaveRoom(
+    //   @ConnectedSocket() client: Socket,
+    //   @MessageBody() eventCode: string,
+    // ) {
+    //   await client.leave(eventCode);
+    //   client.broadcast.emit('user-join',{
+    //     message: 'user disconnect the room',
+    //   })
+    //   this.logger.log(`Client ${client.id} left room: ${eventCode}`);
+    //   return { success: true, message: `Left room ${eventCode}` };
+    // }
+
     @SubscribeMessage('join_room')
-    async handleJoinRoom(
+    handleJoinRoom(
       @ConnectedSocket() client: Socket,
-      @MessageBody() eventCode: string,
+      @MessageBody()
+      data: Data,
     ) {
-      await client.join(eventCode);
-      this.logger.log(`Client ${client.id} joined room: ${eventCode}`);
-  
-      return { success: true, message: `Joined room ${eventCode}` };
+      const {tenantCode, eventId, locationId} = data
+      console.log(`${tenantCode}: ${eventId} : ${locationId}`)
+      const roomId = `${tenantCode}:${eventId}:${locationId}`;
+      this.logger.log(`roomid: ${roomId}`)
+      client.join(roomId);
+      this.logger.log(`Client ${client.id} joined room ${roomId}`);
+      return { success: true, room: roomId };
     }
-  
+
     @SubscribeMessage('leave_room')
-    async handleLeaveRoom(
+    handleLeaveRoom(
       @ConnectedSocket() client: Socket,
-      @MessageBody() eventCode: string,
+      @MessageBody()
+      data: { tenantCode: string; eventId: string; locationId: string },
     ) {
-      await client.leave(eventCode);
-      this.logger.log(`Client ${client.id} left room: ${eventCode}`);
-      return { success: true, message: `Left room ${eventCode}` };
+      const roomId = `${data.tenantCode}:${data.eventId}:${data.locationId}`;
+      client.leave(roomId);
+      this.logger.log(`Client ${client.id} left room ${roomId}`);
+      return { success: true };
     }
-  
+
+    @SubscribeMessage('new_checkin')
+    handleNewCheckin(
+      @ConnectedSocket() client: Socket,
+      @MessageBody()
+      checkinData: {
+        tenantCode: string;
+        eventId: string;
+        locationId: string;
+       // guestInfo: any;
+      },
+    ) {
+      const roomId = `${checkinData.tenantCode}:${checkinData.eventId}:${checkinData.locationId}`;
+
+      this.server.to(roomId).emit('new_checkin_received', checkinData);
+
+      this.logger.log(
+        `Broadcast checkin to room ${roomId}: ${JSON.stringify(checkinData)}`,
+      );
+
+      return { success: true };
+    }
+
     // @SubscribeMessage('new_checkin')
     // handleNewCheckin(
     //   @ConnectedSocket() client: Socket,
