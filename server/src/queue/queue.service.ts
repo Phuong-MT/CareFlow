@@ -9,16 +9,19 @@ export class QueueService {
   constructor(@InjectModel(Queue) private queueModel: typeof Queue) {}
 
   async joinQueue( id: string,createQueueDto: CreateQueueDto): Promise<Queue> {
-    const {tenantCode, locationId, eventId}  = createQueueDto;
+    const {tenantCode, locationId, eventId, name}  = createQueueDto;
     const count = await this.queueModel.count({
       where: { locationId, tenantCode, queueDate: new Date() },
     });
+    console.log(createQueueDto)
     const newQueue = await this.queueModel.create({
-      ...createQueueDto,
+      nameUser: name,
       position: count + 1,
       queueDate: new Date(),
       userId: id, 
-      eventId
+      eventId,
+      locationId,
+      tenantCode
     });
     return newQueue;
   }
@@ -45,5 +48,24 @@ export class QueueService {
 
   async resetDailyQueue(): Promise<void> {
     await this.queueModel.destroy({ where: {} });
+  }
+
+  async findOneUser(payload:{userId: string, eventId: string, locationId: string, tenantCode: string}): Promise<Queue>{
+    return this.queueModel.findOne({
+      where:{
+        userId: payload.userId,
+        locationId: +payload.locationId,
+        eventId: +payload.eventId,
+        tenantCode: payload.tenantCode,
+        queueDate: new Date()
+      }
+    })
+  }
+  async getQueueState(payload:{eventId: string, locationId: string, tenantCode: string}):Promise<Queue[]>{
+    const result = this.queueModel.findAll({
+      where:
+      { tenantCode: payload.tenantCode, locationId: payload.locationId, eventId: payload.eventId }
+    })
+    return result
   }
 }

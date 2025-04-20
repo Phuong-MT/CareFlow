@@ -11,6 +11,8 @@ import {
   import { Server, Socket } from 'socket.io';
   import { Logger } from '@nestjs/common';
   import { Data } from './type';
+  import {QueueService} from 'src/queue/queue.service'
+  import { SocketState } from './type';
   @WebSocketGateway(3002,{
     // cors: process.env.NEXT_PUBLIC_CLIENT_URL || 'https://localhost:3000',
     cors: '*'
@@ -18,6 +20,7 @@ import {
   export class SocketGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
   {
+    constructor(private readonly queueService: QueueService) {}
     @WebSocketServer() server: Server;
     private logger: Logger = new Logger('SocketGateway');
   
@@ -32,89 +35,53 @@ import {
     handleDisconnect(client: Socket) {
       this.logger.log(`Client disconnected: ${client.id}`);
     }
-  
-    // @SubscribeMessage('join_room')
-    // async handleJoinRoom(
-    //   @ConnectedSocket() client: Socket,
-    //   @MessageBody() eventCode: string,
-    // ) {
-    //   await client.join(eventCode);
-    //   this.logger.log(`Client ${client.id} joined room: ${eventCode}`);
-  
-    //   return { success: true, message: `Joined room ${eventCode}` };
-    // }
-  
-    // @SubscribeMessage('leave_room')
-    // async handleLeaveRoom(
-    //   @ConnectedSocket() client: Socket,
-    //   @MessageBody() eventCode: string,
-    // ) {
-    //   await client.leave(eventCode);
-    //   client.broadcast.emit('user-join',{
-    //     message: 'user disconnect the room',
-    //   })
-    //   this.logger.log(`Client ${client.id} left room: ${eventCode}`);
-    //   return { success: true, message: `Left room ${eventCode}` };
-    // }
 
-    @SubscribeMessage('join_room')
-    handleJoinRoom(
+
+    @SubscribeMessage(SocketState.JOIN_ROOM)
+    async handleJoinRoom(
       @ConnectedSocket() client: Socket,
-      @MessageBody()
-      data: Data,
+      @ConnectedSocket() socket: Socket,
+      @MessageBody() data: { tenantCode: string; eventId: string; locationId: string }
     ) {
-      const {tenantCode, eventId, locationId} = data
-      console.log(`${tenantCode}: ${eventId} : ${locationId}`)
+      const { tenantCode, eventId, locationId } = data;
       const roomId = `${tenantCode}:${eventId}:${locationId}`;
-      this.logger.log(`roomid: ${roomId}`)
       client.join(roomId);
+      const queue = await this.queueService.getQueueState(data)
       this.logger.log(`Client ${client.id} joined room ${roomId}`);
-      return { success: true, room: roomId };
+      client.emit(SocketState.QUEUE_STATE,  queue);
+      return { success: true, roomId };
     }
 
-    @SubscribeMessage('leave_room')
-    handleLeaveRoom(
+    @SubscribeMessage(SocketState.NEW_QUEUE_CHECK_IN)
+    async handleNewQueueCheckin(
       @ConnectedSocket() client: Socket,
-      @MessageBody()
-      data: { tenantCode: string; eventId: string; locationId: string },
-    ) {
-      const roomId = `${data.tenantCode}:${data.eventId}:${data.locationId}`;
-      client.leave(roomId);
-      this.logger.log(`Client ${client.id} left room ${roomId}`);
-      return { success: true };
-    }
-
-    @SubscribeMessage('new_checkin')
-    handleNewCheckin(
-      @ConnectedSocket() client: Socket,
-      @MessageBody()
-      checkinData: {
+      @ConnectedSocket() socket: Socket,
+      @MessageBody() data: {
         tenantCode: string;
         eventId: string;
         locationId: string;
-       // guestInfo: any;
-      },
+        name: string;
+      }
     ) {
-      const roomId = `${checkinData.tenantCode}:${checkinData.eventId}:${checkinData.locationId}`;
+      const userId = client.data.user.id;
+      const roomId = `${data.tenantCode}:${data.eventId}:${data.locationId}`;
+      console.log(data)
+      const exists = await this.queueService.findOneUser({userId, eventId: data.eventId, locationId: data.locationId, tenantCode: data.tenantCode});
+      if (exists) {
+        return { success: false, message: 'Already in queue' };
+      }
 
-      this.server.to(roomId).emit('new_checkin_received', checkinData);
+      const queueEntry = await this.queueService.joinQueue(userId,
+         {tenantCode: data.tenantCode, eventId: +data.eventId, locationId: +data.locationId, name: data.name})
 
-      this.logger.log(
-        `Broadcast checkin to room ${roomId}: ${JSON.stringify(checkinData)}`,
-      );
+      // ✅ Broadcast cho toàn room
+      client.to(roomId).emit(SocketState.NEW_QUEUE_RECEiVED, {
+        name: queueEntry.nameUser,
+        position: queueEntry.position,
+        joinedAt: queueEntry.queueDate,
+      });
 
-      return { success: true };
+      return { success: true, queueEntry };
     }
 
-    // @SubscribeMessage('new_checkin')
-    // handleNewCheckin(
-    //   @ConnectedSocket() client: Socket,
-    //   @MessageBody() checkinData: GuestResponse,
-    // ) {
-    //   client
-    //     .to(checkinData.guestInfo.eventCode)
-    //     .emit('new_checkin_received', checkinData);
-    //   this.logger.log(`New checkin: ${JSON.stringify(checkinData)}`);
-    //   return { success: true, message: `New checkin received` };
-    // }
   }

@@ -26,7 +26,7 @@ async function bootstrap() {
       //yamlDocumentUrl: '/api.yaml',
       jsonDocumentUrl: '/api.json',
     }); 
-  //app.useWebSocketAdapter(new WsAdapter(app));      
+  app.useWebSocketAdapter(new WsAdapter(app));      
   await app.listen(process.env.PORT , () => {
     console.log(`Our server is listening on PORT: ${process.env.PORT}`);
   });
