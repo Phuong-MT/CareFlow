@@ -3,7 +3,7 @@ import { Tenant } from 'src/tenant/entities/tenant.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Location } from 'src/location/entities/location.entity';
 import { QueueEnum } from 'src/common/commonEnum';
-
+import {Event} from 'src/event/entities/event.entity'
 @Table({ tableName: 'queues' })
 export class Queue extends Model {
   @ForeignKey(() => Tenant)
@@ -17,6 +17,12 @@ export class Queue extends Model {
   @ForeignKey(() => User)
   @Column({ type: DataType.STRING, allowNull: false })
   userId: string;
+
+  @ForeignKey(()=> Event)
+  eventId: number
+
+  @Column({type: DataType.STRING, allowNull: false})
+  nameUser: string
 
   @Column({ type: DataType.ENUM(...Object.values(QueueEnum)), allowNull: false, defaultValue: QueueEnum.PENDING})
   status: string;
@@ -35,4 +41,7 @@ export class Queue extends Model {
 
   @BelongsTo(() => User)
   user: User;
+
+  @BelongsTo(()=> Event)
+  event: Event
 }

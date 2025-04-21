@@ -18,6 +18,7 @@ import { TenantModule } from './tenant/tenant.module';
 import { QueueModule } from './queue/queue.module';
 import { EventModule } from './event/event.module';
 import { LocationModule } from './location/location.module';
+import { SocketGateway } from './gateways/socket.gateway';
 
 @Module({
   imports: [
@@ -49,6 +50,6 @@ import { LocationModule } from './location/location.module';
     LocationModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,SocketGateway],
 })
 export class AppModule {}
