@@ -17,7 +17,7 @@ import type { Reducer } from 'redux';
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['user', 'events'],
+  whitelist: ['user', 'events','socket'],
 };
 
 type RootReducerType = ReturnType<typeof rootReducer>;

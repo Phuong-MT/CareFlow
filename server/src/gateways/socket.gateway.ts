@@ -49,7 +49,7 @@ import {
       const queue = await this.queueService.getQueueState(data)
       this.logger.log(`Client ${client.id} joined room ${roomId}`);
       client.emit(SocketState.QUEUE_STATE,  queue);
-      return { success: true, roomId };
+      return { success: true, message:`Client ${client.id} joined room ` };
     }
 
     @SubscribeMessage(SocketState.NEW_QUEUE_CHECK_IN)
@@ -65,23 +65,25 @@ import {
     ) {
       const userId = client.data.user.id;
       const roomId = `${data.tenantCode}:${data.eventId}:${data.locationId}`;
-      console.log(data)
       const exists = await this.queueService.findOneUser({userId, eventId: data.eventId, locationId: data.locationId, tenantCode: data.tenantCode});
       if (exists) {
         return { success: false, message: 'Already in queue' };
       }
-
       const queueEntry = await this.queueService.joinQueue(userId,
          {tenantCode: data.tenantCode, eventId: +data.eventId, locationId: +data.locationId, name: data.name})
-
+         const queueData = {
+          userId: queueEntry.userId,
+          nameUser: queueEntry.nameUser,
+          status: queueEntry.status,
+          position: queueEntry.position,
+          queueDate: queueEntry.queueDate,
+        };
       // ✅ Broadcast cho toàn room
       client.to(roomId).emit(SocketState.NEW_QUEUE_RECEiVED, {
-        name: queueEntry.nameUser,
-        position: queueEntry.position,
-        joinedAt: queueEntry.queueDate,
+        queueData
       });
 
-      return { success: true, queueEntry };
+      return { success: true, message: 'New check_in received' };
     }
 
   }

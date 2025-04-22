@@ -85,6 +85,21 @@ export default function EventsPage() {
                   <CardTitle className="flex items-center justify-between">
                     {event.title}
                     {badge[status]}
+                {status == 'upcoming' && (() => {
+                   const roomId = `${event.tenantCode}:${event.id}:${event.locationId}`;
+                  return (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/admin/events/${roomId}/live`);
+                      }}
+                      type="button"
+                      className="border-2 border-black-200 mt-4 rounded-md px-2 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer"
+                    >
+                      View Realtime
+                    </button>
+                  );
+                })()}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="text-sm space-y-1 text-muted-foreground">

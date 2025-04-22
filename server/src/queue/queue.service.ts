@@ -62,9 +62,10 @@ export class QueueService {
     })
   }
   async getQueueState(payload:{eventId: string, locationId: string, tenantCode: string}):Promise<Queue[]>{
-    const result = this.queueModel.findAll({
+    const result =await this.queueModel.findAll({
+      attributes: ['userId', 'nameUser', 'status', 'position', 'queueDate'], 
       where:
-      { tenantCode: payload.tenantCode, locationId: payload.locationId, eventId: payload.eventId }
+      { tenantCode: payload.tenantCode, locationId: payload.locationId, eventId: payload.eventId, queueDate: new Date() }
     })
     return result
   }
