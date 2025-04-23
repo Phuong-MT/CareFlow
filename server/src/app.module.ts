@@ -19,6 +19,7 @@ import { QueueModule } from './queue/queue.module';
 import { EventModule } from './event/event.module';
 import { LocationModule } from './location/location.module';
 import { SocketGateway } from './gateways/socket.gateway';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -47,7 +48,8 @@ import { SocketGateway } from './gateways/socket.gateway';
     TenantModule,
     QueueModule,
     EventModule,
-    LocationModule
+    LocationModule,
+    AnalyticsModule
   ],
   controllers: [AppController],
   providers: [AppService,SocketGateway],

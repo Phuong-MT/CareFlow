@@ -14,6 +14,6 @@ export enum commonEnum {
   export enum QueueEnum {
     PENDING = 'pending',
     SERVING = 'serving',
-    WAITING = 'waiting',
+    SUCCESS = 'SUCCESS',
     IS_CLOSED = 'is_closed',
   }
