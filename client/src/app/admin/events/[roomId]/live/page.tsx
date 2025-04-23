@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/hooks/config';
-import { JoinRoom, NewQueueCheckIn, connectSocket, getSocket } from '@/services/socketServices';
+import { JoinRoom, NewQueueCheckIn, connectSocket, disconnectSocket, getSocket } from '@/services/socketServices';
 import { addQueueState, setConnected } from '@/store/socketSlide';
 import { ResponseQueue, SocketHeader } from '@/types/socketTypes';
 import QueueCheckIn from '@/components/admin/handle-checkin';
@@ -30,24 +30,28 @@ export default function LivePage() {
             socket.off(SocketHeader.QUEUE_STATE);
             socket.off(SocketHeader.NEW_QUEUE_RECEIVED);
           }
+          disconnectSocket();
         };
       } catch (error) {
         console.error("Error joining room:", error);
       }
       
-    return () => {
-      const socket = getSocket();
-      if (socket) {
-        socket.off(SocketHeader.QUEUE_STATE);
-        socket.off(SocketHeader.NEW_QUEUE_RECEIVED);
-      }
-    };
+    // return () => {
+    //   const socket = getSocket();
+    //   if (socket) {
+    //     socket.off(SocketHeader.QUEUE_STATE);
+    //     socket.off(SocketHeader.NEW_QUEUE_RECEIVED);
+    //   }
+    // };
   }, [roomId, token, dispatch]);
   const socket = getSocket()
   useEffect(() => {
-    socket?.on(SocketHeader.NEW_QUEUE_RECEIVED, (queueData: ResponseQueue) => {
-      dispatch(addQueueState(queueData))
-    });
+    if(socket){
+      socket.off(SocketHeader.NEW_QUEUE_RECEIVED);
+      socket.on(SocketHeader.NEW_QUEUE_RECEIVED, (queueData: ResponseQueue) => {
+        dispatch(addQueueState(queueData))
+      });
+    }
   }, [socket]);
   const handleNewQueueCheckIn = (newUser: { name: string; tenantCode: string; eventId: string; locationId: string }) => {
     NewQueueCheckIn(newUser);
@@ -64,9 +68,9 @@ export default function LivePage() {
           <p className="text-gray-500">Không có người nào trong hàng chờ.</p>
         ) : (
           <ul className="space-y-2">
-            {queueState.map((item) => (
+            {queueState.map((item, index) => (
               <li
-                key={item.userId}
+                key={item.userId || index}
                 className="p-3 bg-blue-50 rounded-lg flex justify-between items-center"
               >
                 <span className="font-medium">{item.nameUser}</span>

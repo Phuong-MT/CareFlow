@@ -79,9 +79,9 @@ import {
           queueDate: queueEntry.queueDate,
         };
       // ✅ Broadcast cho toàn room
-      client.to(roomId).emit(SocketState.NEW_QUEUE_RECEiVED, {
+      this.server.to(roomId).emit(SocketState.NEW_QUEUE_RECEiVED,
         queueData
-      });
+      );
 
       return { success: true, message: 'New check_in received' };
     }

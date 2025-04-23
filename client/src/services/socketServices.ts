@@ -2,7 +2,7 @@
 import { io, Socket } from 'socket.io-client';
 import { ResponseQueue, SocketHeader } from '@/types/socketTypes';
 import { store } from '@/store/stores';
-import { setQueueState, addQueueState } from '@/store/socketSlide';
+import { setQueueState, addQueueState, setDisconnected } from '@/store/socketSlide';
 let socket: Socket | null = null;
 
 export const connectSocket = (url: string, token: string): Socket => {
@@ -26,7 +26,10 @@ export const connectSocket = (url: string, token: string): Socket => {
 export const getSocket = () => socket;
 
 export const disconnectSocket = () => {
-  socket?.disconnect();
+  if(socket){
+    socket.disconnect();
+    store.dispatch(setDisconnected())
+  }
   socket = null;
 };
 
@@ -63,7 +66,4 @@ export const NewQueueCheckIn = (data: {
     socket.emit(SocketHeader.NEW_QUEUE_CHECK_IN, data, (response: { success: boolean; message: string }) => {
         console.log(`Check in queue: ${response.message}`);
     });
-    socket?.on(SocketHeader.NEW_QUEUE_RECEIVED, (data: ResponseQueue)=>{
-        store.dispatch(addQueueState(data))
-    })
   };

@@ -19,6 +19,7 @@ const socketSlice = createSlice({
     setDisconnected: (state) => {
       state.isConnected = false;
       state.socketId = null;
+      state.queueState = []
     },
     setQueueState:(state, action:PayloadAction<ResponseQueue[]>)=>{
         state.queueState = action.payload
