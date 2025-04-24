@@ -1,11 +1,20 @@
-import { SiteHeader } from "@/components/admin/site-header";
+"use client"
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import data from "@/utils/data.json"
 import { SectionCards } from "@/components/admin/section-cards";
 import { ChartAreaInteractive } from "@/components/admin/chart-area-interactive";
 import { DataTable } from "@/components/admin/data-tables";
-export default function MyAccount(){
+import { useAppDispatch, useAppSelector } from "@/hooks/config";
+import { postAnalyticsDaily } from "@/store/analyticsSlide";
+export default function AnalyticsPage(){
+  const [startDate, setStartDate] = useState<string>('')
+  const dispatch = useAppDispatch()
+  const {dataAnalytics} = useAppSelector((state)=>state.analytics)
+  useEffect(()=>{
+      dispatch(postAnalyticsDaily(startDate))
+  },[startDate])
+  
     return (
         <>
         {/* <SiteHeader /> */}
@@ -14,7 +23,9 @@ export default function MyAccount(){
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
               <SectionCards />
               <div className="px-4 lg:px-6">
-                <ChartAreaInteractive />
+                <ChartAreaInteractive  chartData={dataAnalytics}
+                onDateChange={(date) => setStartDate(date)}
+                />
               </div>
               <DataTable data={data} />
             </div>

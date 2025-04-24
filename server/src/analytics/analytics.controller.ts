@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { AnalyticsService } from './analytics.service';
 import { JwtAuthGuard } from 'src/users/passport/jwt-auth.guard';
 import { RolesGuard } from 'src/common/roles.guard';
@@ -16,8 +16,8 @@ export class AnalyticsController {
     return this.analyticsService.countQueuesPerEvent();
   }
 
-  @Get('daily-queues')
-  async getQueueStatsPerDay() {
-    return this.analyticsService.countQueuesPerDay();
+  @Post('daily-queues')
+  async getQueueStatsPerDay(@Body()numDays: string = '30d') {
+    return this.analyticsService.countQueuesPerDay(numDays);
   }
 }

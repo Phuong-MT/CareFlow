@@ -4,6 +4,7 @@ import { Sequelize } from 'sequelize-typescript';
 import { Event } from '../event/entities/event.entity';
 import { Queue } from '../queue/entities/queue.entity';
 import { QueueEnum } from 'src/common/commonEnum';
+import { Op } from 'sequelize';
 @Injectable()
 export class AnalyticsService {
   constructor(
@@ -45,12 +46,36 @@ export class AnalyticsService {
   
     return eventStats;
   }
-  async countQueuesPerDay() {
+  async countQueuesPerDay(numDays: string) {
+    let days = 30; 
+
+    if (typeof numDays === 'string' && numDays.endsWith('d')) {
+      days = parseInt(numDays.replace('d', ''), 10);
+    }
+    const today = new Date();
+    const startDate = new Date();
+    startDate.setDate(today.getDate() - days);
     const result = await this.queueModel.findAll({
       attributes: [
         [Sequelize.fn('DATE', Sequelize.col('queueDate')), 'date'], 
-        [Sequelize.fn('COUNT', Sequelize.col('id')), 'queueCount'],
+        [
+          Sequelize.literal(`COUNT(CASE WHEN status = '${QueueEnum.PENDING}' THEN 1 END)`),
+          'pending',
+        ],
+        [
+          Sequelize.literal(`COUNT(CASE WHEN status = '${QueueEnum.SERVING}' THEN 1 END)`),
+          'serving',
+        ],
+        [
+          Sequelize.literal(`COUNT(CASE WHEN status = '${QueueEnum.SUCCESS}' THEN 1 END)`),
+          'success',
+        ],
       ],
+      where: {
+        queueDate: {
+          [Op.gte]: startDate,
+        },
+      },
       group: [Sequelize.fn('DATE', Sequelize.col('queueDate'))],
       order: [[Sequelize.fn('DATE', Sequelize.col('queueDate')), 'DESC']],
     });
