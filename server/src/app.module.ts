@@ -11,6 +11,7 @@ import { Tenant } from './tenant/entities/tenant.entity';
 import { Queue } from './queue/entities/queue.entity';
 import { Event } from './event/entities/event.entity';
 import { Location } from './location/entities/location.entity';
+import {Counter} from './counter/entities/counter.entity'
 // module
 import { UsersModule } from './users/users.module';
 import { JustItModule } from './just-it/just-it.module';
@@ -20,6 +21,7 @@ import { EventModule } from './event/event.module';
 import { LocationModule } from './location/location.module';
 import { SocketGateway } from './gateways/socket.gateway';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { CounterModule } from './counter/counter.module';
 
 @Module({
   imports: [
@@ -37,19 +39,20 @@ import { AnalyticsModule } from './analytics/analytics.module';
         username: configService.get('DB_USER'),
         password: configService.get('DB_PASS'),
         database: configService.get('DB_NAME'),
-        models: [User, Justit, Tenant, Queue, Event, Location],
+        models: [User, Justit, Tenant, Queue, Event, Location, Counter],
         autoLoadModels: true,
         synchronize: true,
       }),
     }),
-    SequelizeModule.forFeature([Tenant, User, Queue, Event, Location]),
+    SequelizeModule.forFeature([Tenant, User, Queue, Event, Location, Counter]),
     UsersModule,
     JustItModule,
     TenantModule,
     QueueModule,
     EventModule,
     LocationModule,
-    AnalyticsModule
+    AnalyticsModule,
+    CounterModule
   ],
   controllers: [AppController],
   providers: [AppService,SocketGateway],
