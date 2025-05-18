@@ -33,13 +33,14 @@ import { useAppDispatch, useAppSelector } from "@/hooks/config"
 import { logout } from "@/store/authSlide"
 import { useRouter } from 'next/navigation';
 export function NavUser({
-  user,
+  user, role
 }: {
   user: {
     name: string
     email: string
     avatar: string
-  }
+  },
+  role?: string
 }) {
   const { isMobile } = useSidebar()
   const userinfo = useAppSelector(state=> state.user.user)
@@ -52,6 +53,14 @@ export function NavUser({
      router.push('/');
     }catch(error){
       console.error("logout error:", error);
+    }
+  }
+  const handleAccount = ()=>{
+    try{
+      console.log(`account ${role}`)
+      router.push(`/${role}/account`)
+    }catch(error){
+      console.log('error in account function', error)
     }
   }
   return (
@@ -103,9 +112,11 @@ export function NavUser({
             <DropdownMenuGroup>
               <DropdownMenuItem>
               <BadgeCheck />
-                <a href="/admin/account">
-                    Account
-                </a>
+              <button
+              onClick={handleAccount}
+              >
+                Account
+              </button>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <CreditCard />

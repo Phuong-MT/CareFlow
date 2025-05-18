@@ -38,6 +38,7 @@ interface User {
   export enum UserRole {
     ADMIN = 'admin',
     SUPER_ADMIN = 'super_admin',
-    USER = 'user'
+    USER = 'user',
+    POC = 'poc',
   }
   export type { User, AuthState, LoginPayload, LoginResponse, RegisterPayload};

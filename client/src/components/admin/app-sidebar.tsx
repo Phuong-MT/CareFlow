@@ -1,5 +1,5 @@
 "use client"
-import { MenuSidebar } from '../../utils/menu'
+import { MenuSidebar , MenuSidebarPoc} from '../../utils/menu'
 
 import * as React from "react"
 import { NavMain } from "@/components/admin/nav-main"
@@ -13,9 +13,15 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
+import {useState} from "react"
+import { useAppSelector } from '@/hooks/config'
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const {user} = useAppSelector(state => state.user)
+  const [userRole, setUserRole] = useState(user?.role)
+
   return (
-    <Sidebar collapsible="icon" {...props}>
+    userRole === "admin" || userRole === "super_admin" ?(
+      <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <TeamSwitcher teams={MenuSidebar.teams} />
       </SidebarHeader>
@@ -24,9 +30,25 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavProjects projects={MenuSidebar.projects} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={MenuSidebar.user} />
+        <NavUser user={MenuSidebar.user} role = {userRole} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
+    )
+    :(
+      <Sidebar collapsible="icon" {...props}>
+      <SidebarHeader>
+        <TeamSwitcher teams={MenuSidebarPoc.teams} />
+      </SidebarHeader>
+      <SidebarContent>
+        <NavMain items={MenuSidebarPoc.navMain} />
+        <NavProjects projects={MenuSidebarPoc.projects} />
+      </SidebarContent>
+      <SidebarFooter>
+        <NavUser user={MenuSidebarPoc.user} role = {userRole}/>
+      </SidebarFooter>
+      <SidebarRail />
+    </Sidebar>
+    )
   )
 }

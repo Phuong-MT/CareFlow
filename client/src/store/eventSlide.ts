@@ -1,14 +1,19 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { apiGetAllEvents} from '@/services/eventServices';
-import { Event, EventRequest, EventState } from '@/types/eventTypes';
+import {EventApiResponse, EventRequest, EventState } from '@/types/eventTypes';
 
 export const initialState: EventState = {
     events: null,
     status: 'idle',
-    error: null
+    error: null,
+    pagination:{
+        page: 1,
+        limit: 10,
+        total: 0
+    }
 };
 
-export const getAllEvents = createAsyncThunk<EventState,EventRequest, {rejectValue: string} >(' events/getAllEvents', async(payload,{rejectWithValue})=>{
+export const getAllEvents = createAsyncThunk<EventApiResponse,EventRequest, {rejectValue: string} >(' events/getAllEvents', async(payload,{rejectWithValue})=>{
   try{
     const response = await apiGetAllEvents(payload);
     console.log(response.data)
@@ -37,7 +42,12 @@ const EventsSlice = createSlice({
       })
       .addCase(getAllEvents.fulfilled, (state, action)=>{
         state.status = 'succeeded',
-        state.events = action.payload.events
+        state.events = action.payload.events,
+        state.pagination = {
+            total: action.payload.total ,
+            page: action.payload.page,
+            limit: action.payload.limit,
+          };
         state.error = null
       })
       .addCase(getAllEvents.rejected, (state, action)=>{

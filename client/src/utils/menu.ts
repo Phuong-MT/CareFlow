@@ -41,57 +41,15 @@ export const  MenuSidebar = {
       isActive: true,
       items: [
         {
-          title: "event",
+          title: "Event",
           url: "/events",
         },
         {
-          title: "analytics",
+          title: "Analytics",
           url: "/analys",
         },
         {
           title: "Settings",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Models",
-      url: "/abcabc",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "/xyzxyz",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
           url: "#",
         },
       ],
@@ -121,21 +79,76 @@ export const  MenuSidebar = {
     },
   ],
   projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
   ],
 }
-  
+export const MenuSidebarPoc = {
+  user: {
+    name: "shadcn",
+    email: "m@example.com",
+    avatar: "https://github.com/shadcn.png",
+  },
+  teams: [
+    {
+      name: "Acme Inc",
+      logo: GalleryVerticalEnd,
+      plan: "Enterprise",
+    },
+    {
+      name: "Acme Corp.",
+      logo: AudioWaveform,
+      plan: "Startup",
+    },
+    {
+      name: "Evil Corp.",
+      logo: Command,
+      plan: "Free",
+    },
+  ], 
+  navMain: [
+    {
+      title: "Playground",
+      url: "/poc",
+      icon: SquareTerminal,
+      isActive: true,
+      items: [
+        {
+          title: "Event-detail",
+          url: "/event",
+        },
+        {
+          title: "Profile",
+          url: "/account",
+        },
+        {
+          title: "Settings",
+          url: "/setting",
+        },
+      ],
+    },
+    {
+      title: "Settings",
+      url: "#",
+      icon: Settings2,
+      items: [
+        {
+          title: "General",
+          url: "#",
+        },
+        {
+          title: "Team",
+          url: "#",
+        },
+        {
+          title: "Billing",
+          url: "#",
+        },
+        {
+          title: "Limits",
+          url: "#",
+        },
+      ],
+    },
+  ],
+  projects: [
+  ],
+}

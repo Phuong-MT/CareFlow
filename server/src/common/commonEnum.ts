@@ -8,7 +8,8 @@ export enum commonEnum {
     SUPER_ADMIN = 'super_admin',
     ADMIN = 'admin',
     OPERATOR = 'operator',
-    USER = 'user'
+    USER = 'user',
+    POC = 'poc'
   }
 
   export enum QueueEnum {

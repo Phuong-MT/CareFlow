@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, Query, UseGuards, Request } from '@nestjs/common';
 import { EventService } from './event.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
@@ -19,8 +19,9 @@ export class EventController {
 
   @Get('findAllEvent')
   @Roles('super_admin', 'admin')
-  findAllEvent(@Query('page') page: number = 1, @Query('limit') limit: number = 10) {
-    return this.eventService.findAllEvent(page, limit);
+  findAllEvent(@Request() req: any,@Query('page') page: number = 1, @Query('limit') limit: number = 10) {
+    console.log(req.user);
+    return this.eventService.findAllEvent(req.user.id, +page, +limit);
   }
 
   @Get('findAllEventUserCanSee')

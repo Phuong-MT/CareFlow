@@ -21,7 +21,7 @@ export class Event extends Model {
   @Column({ type: DataType.DATE, allowNull: false })
   dateEnd: Date;
   
-  @BelongsTo(() => Tenant)
+  @BelongsTo(() => Tenant, { targetKey: 'tenantCode', foreignKey: 'tenantCode' })
   tenant: Tenant;
 
   @BelongsTo(() => Location)
