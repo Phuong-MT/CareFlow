@@ -1,6 +1,5 @@
 import api from '@/utils/axiosConfig';
 import {LoginPayload, RegisterPayload} from '@/types/authTypes';
-import { PocUser } from '@/types/pocTypes';
 
 export const apiLogin = async (payload: LoginPayload) => {
   try {
@@ -51,13 +50,4 @@ export const apiVerifyToken = async () =>{
     throw error;
   }
   
-}
-export const apiGetPocUser = async()=>{
-  try{
-    const response = await api.get<PocUser[]>('/poc-assigment/user')
-    return response.data;
-  }catch(error){
-    console.error("Ger all PocUser error:", error);
-    throw error;
-  }
 }

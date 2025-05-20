@@ -10,7 +10,7 @@ import { v4 } from 'uuid';
 import { ConfigService } from '@nestjs/config';
 import { Justit } from 'src/just-it/entities/just-it.entity';
 import { Tenant } from 'src/tenant/entities/tenant.entity';
-import { RoleEnum } from 'src/common/commonEnum';
+import { commonEnum, RoleEnum } from 'src/common/commonEnum';
 
 @Injectable()
 export class UsersService {
@@ -191,5 +191,26 @@ export class UsersService {
     name: user.name,
     role: user.role,
    }
+  }
+
+  // get all poc function
+  async getAllPoc(id: string){
+    const user = await this.userModel.findByPk(id)
+    if(!user){
+      throw new BadRequestException(
+        transformError(
+          'id',
+          ERROR_TYPE.NOT_FOUND,
+        )
+      )
+    }
+    const poc = await this.userModel.findAll({
+      where:{
+        role: RoleEnum.POC,
+        status: commonEnum.ACTIVE,
+        tenantCode: user.tenantCode
+      }
+    })
+    return poc;
   }
 }

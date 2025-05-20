@@ -3,12 +3,13 @@ import { CreatePocAssignmentDto } from './dto/create-poc-assignment.dto';
 import { UpdatePocAssignmentDto } from './dto/update-poc-assignment.dto';
 import { PocAssignment } from './entities/poc-assignment.entity';
 import { InjectModel } from '@nestjs/sequelize';
-
+import { UsersService } from 'src/users/users.service';
 @Injectable()
 export class PocAssignmentService {
   constructor(
     @InjectModel(PocAssignment)
     private readonly pocAssignmentModel: typeof PocAssignment,
+    private readonly userService: UsersService,
   ) {}
 
   async getAssignmentsByUser(userId: string) {
@@ -35,5 +36,12 @@ export class PocAssignmentService {
       },
     );
   }
-
+  async getAllPoc(userId: string) {
+    try{
+      const pocUser = await this.userService.getAllPoc(userId);
+      return pocUser;
+    }catch(err){
+      throw new Error(err);
+    }
+  }
 }

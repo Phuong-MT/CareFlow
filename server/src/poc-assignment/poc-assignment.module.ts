@@ -10,6 +10,7 @@ import { RolesGuard } from 'src/common/roles.guard';
 @Module({
   imports: [SequelizeModule.forFeature([PocAssignment]), UsersModule],
   controllers: [PocAssignmentController],
-  providers: [PocAssignmentService,JwtStrategy, RolesGuard]
+  providers: [PocAssignmentService,JwtStrategy, RolesGuard],
+  exports: [PocAssignmentService],
 })
 export class PocAssignmentModule {}

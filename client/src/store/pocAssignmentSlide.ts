@@ -2,12 +2,13 @@
 import { createSlice, createAsyncThunk} from '@reduxjs/toolkit';
 import { apiGetPocAssignments } from '@/services/pocAssignmentService';
 import { PocAssignment,PocUser,ResponsePOC } from '@/types/pocTypes';
-import {apiGetPocUser} from '@/services/authServices'
+import {apiGetPocUser} from '@/services/pocAssignmentService'
 
 export const initialState: ResponsePOC = {
     dataPocAssignment: [],
     status: 'idle',
-    error: ''
+    error: '',
+    dataPocUser: []
 };
 
 export const getAssignments = createAsyncThunk<PocAssignment[], void,{ rejectValue: string }>('poc/get-poc-assignment', async (_,thunkAPI) => {
@@ -19,7 +20,7 @@ export const getAssignments = createAsyncThunk<PocAssignment[], void,{ rejectVal
       return thunkAPI.rejectWithValue(message as string)
     }
   });
-const getPocUser = createAsyncThunk<PocUser[], void, { rejectValue: string }>('poc/get-poc-user', async (_, thunkAPI) => {
+const getPocUser = createAsyncThunk<PocUser[], void, { rejectValue: string }>('poc/get-poc-all', async (_, thunkAPI) => {
     try{
         const res = await apiGetPocUser()
         return res
@@ -50,7 +51,20 @@ const pocAssignmentSlice = createSlice({
                 state.status = 'failed';
                 state.dataPocAssignment = [];
                 state.error = action.payload ?? 'POC get thất bại';
-            });
+            })
+            .addCase(getPocUser.pending,(state)=>{
+                state.status = 'loading';
+                state.error = '';
+            })
+            .addCase(getPocUser.fulfilled, (state, action)=>{
+                state.status = 'success';
+                state.dataPocUser = action.payload;
+            })
+            .addCase(getPocUser.rejected,(state, action)=>{
+                state.status = 'failed';
+                state.dataPocUser = [];
+                state.error = action.payload ?? 'POC get thất bại';
+            })
     },
 });
 export const { setPocAssignment } = pocAssignmentSlice.actions;

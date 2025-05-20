@@ -10,3 +10,12 @@ export const apiGetPocAssignments = async ():Promise<PocAssignment[]>=>{
         throw error;
     }
 }
+export const apiGetPocUser = async()=>{
+  try{
+    const response = await api.get('poc-assignment/pocUser') 
+    return response.data;
+  }catch(error){
+    console.error("Get all PocUser error:", error);
+    throw error;
+  }
+}

@@ -10,6 +10,7 @@ interface PocAssignment{
 }
 interface ResponsePOC{
     dataPocAssignment: PocAssignment[];
+    dataPocUser: PocUser[];
     status: string;
     error: string;
 }

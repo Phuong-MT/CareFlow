@@ -49,6 +49,10 @@ export const  MenuSidebar = {
           url: "/analys",
         },
         {
+           title: "Poc Assignment",
+          url: "/poc-assignment",
+        },
+        {
           title: "Settings",
           url: "#",
         },

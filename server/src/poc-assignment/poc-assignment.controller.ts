@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, Req, BadRequestException } from '@nestjs/common';
 import { PocAssignmentService } from './poc-assignment.service';
 import { Roles } from 'src/common/roles.decorator';
 import { RoleEnum } from 'src/common/commonEnum';
@@ -33,5 +33,13 @@ export class PocAssignmentController {
   }) {
     return await this.pocAssignmentService.updatePocAssignment(req.user.id,body);
   }
-  
+  @Roles()
+  @Get('pocUser')
+  async getAllPoc(@Request() req: any) {
+    try{
+      return await this.pocAssignmentService.getAllPoc(req.user.id);
+    }catch(err){
+      throw new BadRequestException;
+    }
+  }
 }
