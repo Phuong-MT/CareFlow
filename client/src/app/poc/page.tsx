@@ -4,11 +4,10 @@ import { useAppDispatch, useAppSelector } from '@/hooks/config'
 import { getAssignments } from '@/store/pocAssignmentSlide';
 
 export default function PocAssignmentList() {
-  const dispatch = useAppDispatch();
-  const { dataPocAssignment,status, error } = useAppSelector((state) => state.poc);
-
+  const dispatch = useAppDispatch()
+  const { dataPocAssignment, status, error } = useAppSelector((state) => state.poc);
   useEffect(() => {
-    dispatch(getAssignments());
+    dispatch(getAssignments())
   }, [dispatch]);
 
   if (status === 'loading') return <p>Đang tải dữ liệu POC...</p>;

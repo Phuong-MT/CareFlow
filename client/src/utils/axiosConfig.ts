@@ -1,6 +1,4 @@
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { store } from '@/store/stores';
-import type { RootState } from '@/store/stores'
 const baseURL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000';
 
 let isRefreshing = false;
@@ -29,11 +27,23 @@ const api = axios.create({
 
 // Request Interceptor
 api.interceptors.request.use(
-  (config)=> {
-    const state: RootState = store.getState();
-    const accessToken = state?.user?.access_token;
-    if (accessToken && config.headers) {
-      config.headers['Authorization'] = `Bearer ${accessToken}`;
+  (config) => {
+    if (typeof window !== 'undefined') {
+      const rawPersist = localStorage.getItem('persist:root');
+      if (rawPersist) {
+        try {
+          const persistObj = JSON.parse(rawPersist);
+          if (persistObj.user) {
+            const userObj = JSON.parse(persistObj.user);
+            const accessToken = userObj.access_token;
+            if (accessToken && config.headers) {
+              config.headers['Authorization'] = `Bearer ${accessToken}`;
+            }
+          }
+        } catch (e) {
+          console.error('Error parsing persisted user', e);
+        }
+      }
     }
     return config;
   },

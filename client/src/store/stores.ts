@@ -13,11 +13,10 @@ import storage from 'redux-persist/lib/storage';
 import rootReducer from './rootReducer';
 import type { PersistPartial } from 'redux-persist/es/persistReducer';
 import type { Reducer } from 'redux';
-
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['user', 'events','socket', 'analytics'],
+  whitelist: ['user', 'events','socket', 'analytics','poc'],
 };
 
 type RootReducerType = ReturnType<typeof rootReducer>;

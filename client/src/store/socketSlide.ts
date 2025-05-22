@@ -31,4 +31,4 @@ const socketSlice = createSlice({
 });
 
 export const { setConnected, setDisconnected, setQueueState, addQueueState} = socketSlice.actions;
-export default socketSlice.reducer;
+export const socketReducer = socketSlice.reducer;

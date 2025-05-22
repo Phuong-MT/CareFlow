@@ -33,11 +33,12 @@ export class PocAssignmentController {
   }) {
     return await this.pocAssignmentService.updatePocAssignment(req.user.id,body);
   }
-  @Roles()
+ @Roles(RoleEnum.POC, RoleEnum.ADMIN, RoleEnum.SUPER_ADMIN)
   @Get('pocUser')
   async getAllPoc(@Request() req: any) {
     try{
-      return await this.pocAssignmentService.getAllPoc(req.user.id);
+      const pocUser = await this.pocAssignmentService.getAllPoc(req.user.id);
+      return pocUser
     }catch(err){
       throw new BadRequestException;
     }

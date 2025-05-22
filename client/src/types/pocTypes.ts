@@ -1,5 +1,5 @@
 import {Event} from './eventTypes';
-interface PocAssignment{
+interface PocAssignmentType{
     id: number;
     userId: string;
     eventId: number;
@@ -9,7 +9,7 @@ interface PocAssignment{
     //location: Location;
 }
 interface ResponsePOC{
-    dataPocAssignment: PocAssignment[];
+    dataPocAssignment: PocAssignmentType[];
     dataPocUser: PocUser[];
     status: string;
     error: string;
@@ -18,7 +18,9 @@ interface ResponsePOC{
 interface PocUser {
   id: number;
   email: string;
-  fullName?: string;
+  name?: string;
+  role:string;
+  tenantCode: string;
 }
 
-export type {PocAssignment, ResponsePOC, PocUser};
+export type {PocAssignmentType, ResponsePOC, PocUser};

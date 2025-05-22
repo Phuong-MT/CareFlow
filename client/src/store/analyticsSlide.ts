@@ -49,4 +49,4 @@ const AnalyticsSlice = createSlice({
 
 
 export const { setAnalytics } = AnalyticsSlice.actions;
-export default AnalyticsSlice.reducer
+export const analyticsReducer = AnalyticsSlice.reducer;

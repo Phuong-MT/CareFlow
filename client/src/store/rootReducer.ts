@@ -1,16 +1,16 @@
 // store/rootReducer.ts
 import { combineReducers } from '@reduxjs/toolkit';
-import authSlice from './authSlide'
-import eventSlice from './eventSlide'
-import socketSlice from './socketSlide'
-import analyticsSlice from './analyticsSlide'
-import pocAssignmentSlice from './pocAssignmentSlide'
+import { authReducer } from './authSlide';
+import { eventReducer } from './eventSlide';
+import { socketReducer } from './socketSlide';
+import { analyticsReducer } from './analyticsSlide';
+import PocAssignmentList from './pocAssignmentSlide';
 const rootReducer = combineReducers({
-  user : authSlice ,
-  events: eventSlice ,
-  socket: socketSlice,
-  analytics : analyticsSlice,
-  poc: pocAssignmentSlice
+  user : authReducer ,
+  events: eventReducer ,
+  socket: socketReducer,
+  analytics : analyticsReducer,
+  poc: PocAssignmentList
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

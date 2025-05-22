@@ -45,7 +45,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavProjects projects={MenuSidebarPoc.projects} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={MenuSidebarPoc.user} role = {userRole}/>
+        <NavUser user={MenuSidebarPoc.user} role = 'poc'/>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

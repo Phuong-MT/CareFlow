@@ -1,9 +1,9 @@
 import api from "@/utils/axiosConfig";
-import {PocAssignment, ResponsePOC} from "@/types/pocTypes";
+import {PocAssignmentType} from "@/types/pocTypes";
 
-export const apiGetPocAssignments = async ():Promise<PocAssignment[]>=>{
+export const apiGetPocAssignments = async ():Promise<PocAssignmentType[]>=>{
     try {
-        const response = await api.get<PocAssignment[]>("/poc-assignment/userId")
+        const response = await api.get<PocAssignmentType[]>("/poc-assignment/userId")
         return response.data;
     } catch (error) {
         console.error("Get all events by Poc error:", error);

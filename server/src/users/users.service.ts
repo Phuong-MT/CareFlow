@@ -209,7 +209,8 @@ export class UsersService {
         role: RoleEnum.POC,
         status: commonEnum.ACTIVE,
         tenantCode: user.tenantCode
-      }
+      },
+      attributes:['id','name','email','role','tenantCode']
     })
     return poc;
   }

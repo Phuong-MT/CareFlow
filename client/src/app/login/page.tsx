@@ -55,7 +55,7 @@ export default function LoginPage() {
       else if( loginMode === 'user'){
         await dispatch(login(data));
         if(user?.role === UserRole.USER) router.push('/')
-        else if(user?.role === UserRole.POC) router.push('poc')
+        else if(user?.role === UserRole.POC) router.push('/poc')
         else{
           console.log(error)
         }

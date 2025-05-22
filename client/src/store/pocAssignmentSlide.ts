@@ -1,17 +1,14 @@
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import {ResponsePOC, PocAssignmentType, PocUser} from '@/types/pocTypes';
+import { apiGetPocAssignments, apiGetPocUser } from '@/services/pocAssignmentService';
 
-import { createSlice, createAsyncThunk} from '@reduxjs/toolkit';
-import { apiGetPocAssignments } from '@/services/pocAssignmentService';
-import { PocAssignment,PocUser,ResponsePOC } from '@/types/pocTypes';
-import {apiGetPocUser} from '@/services/pocAssignmentService'
-
-export const initialState: ResponsePOC = {
-    dataPocAssignment: [],
-    status: 'idle',
-    error: '',
-    dataPocUser: []
-};
-
-export const getAssignments = createAsyncThunk<PocAssignment[], void,{ rejectValue: string }>('poc/get-poc-assignment', async (_,thunkAPI) => {
+export const initialState:ResponsePOC = {
+    dataPocAssignment:[],
+    dataPocUser:[],
+    status:'idle',
+    error:''
+}
+export const getAssignments = createAsyncThunk<PocAssignmentType[], void,{ rejectValue: string }>('poc/get-poc-assignment', async (_,thunkAPI) => {
     try {
       const res = await apiGetPocAssignments()
       return res
@@ -20,7 +17,7 @@ export const getAssignments = createAsyncThunk<PocAssignment[], void,{ rejectVal
       return thunkAPI.rejectWithValue(message as string)
     }
   });
-const getPocUser = createAsyncThunk<PocUser[], void, { rejectValue: string }>('poc/get-poc-all', async (_, thunkAPI) => {
+export const getPocUser = createAsyncThunk<PocUser[], void, { rejectValue: string }>('poc/get-poc-all', async (_, thunkAPI) => {
     try{
         const res = await apiGetPocUser()
         return res
@@ -30,7 +27,7 @@ const getPocUser = createAsyncThunk<PocUser[], void, { rejectValue: string }>('p
     }
 })
 const pocAssignmentSlice = createSlice({
-    name: 'pocAssignment',
+    name: 'poc',
     initialState,
     reducers: {
         setPocAssignment(state, action) {

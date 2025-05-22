@@ -52,6 +52,7 @@
     "zod": "3.24.2"
   },
   "devDependencies": {
+    "@babel/plugin-transform-modules-commonjs": "^7.27.1",
     "@eslint/eslintrc": "3.3.0",
     "@tailwindcss/postcss": "4.0.0",
     "@types/node": "22.13.9",
