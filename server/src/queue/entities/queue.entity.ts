@@ -4,7 +4,6 @@ import { User } from 'src/users/entities/user.entity';
 import { Location } from 'src/location/entities/location.entity';
 import { QueueEnum } from 'src/common/commonEnum';
 import {Event} from 'src/event/entities/event.entity'
-import { Counter } from 'src/counter/entities/counter.entity';
 @Table({ tableName: 'queues' })
 export class Queue extends Model {
   @ForeignKey(() => Tenant)
@@ -45,10 +44,4 @@ export class Queue extends Model {
 
   @BelongsTo(()=> Event)
   event: Event
-  @ForeignKey(() => Counter)
-  @Column({ type: DataType.INTEGER, allowNull: true })
-  CounterId: number;
-
-  @BelongsTo(() => Counter)
-  Counter: Counter;
 }

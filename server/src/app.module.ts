@@ -11,8 +11,9 @@ import { Tenant } from './tenant/entities/tenant.entity';
 import { Queue } from './queue/entities/queue.entity';
 import { Event } from './event/entities/event.entity';
 import { Location } from './location/entities/location.entity';
-import {Counter} from './counter/entities/counter.entity'
 import { PocAssignment } from './poc-assignment/entities/poc-assignment.entity';
+import { PocLocation } from './poc-assignment/entities/poc-location.entity';
+import { FloorPlan } from './floorplan/entities/floorplan.entity';
 // module
 import { UsersModule } from './users/users.module';
 import { JustItModule } from './just-it/just-it.module';
@@ -22,8 +23,8 @@ import { EventModule } from './event/event.module';
 import { LocationModule } from './location/location.module';
 import { SocketGateway } from './gateways/socket.gateway';
 import { AnalyticsModule } from './analytics/analytics.module';
-import { CounterModule } from './counter/counter.module';
 import { PocAssignmentModule } from './poc-assignment/poc-assignment.module';
+import { FloorplanModule } from './floorplan/floorplan.module';
 
 @Module({
   imports: [
@@ -41,12 +42,12 @@ import { PocAssignmentModule } from './poc-assignment/poc-assignment.module';
         username: configService.get('DB_USER'),
         password: configService.get('DB_PASS'),
         database: configService.get('DB_NAME'),
-        models: [User, Justit, Tenant, Queue, Event, Location, Counter, PocAssignment],
+        models: [User, Justit, Tenant, Queue, Event, Location, FloorPlan, PocAssignment, PocLocation],
         autoLoadModels: true,
         synchronize: true,
       }),
     }),
-    SequelizeModule.forFeature([Tenant, User, Queue, Event, Location, Counter,PocAssignment ]),
+    SequelizeModule.forFeature([Tenant, User, Queue, Event, Location,PocAssignment,PocLocation,Justit,FloorPlan]),
     UsersModule,
     JustItModule,
     TenantModule,
@@ -54,8 +55,8 @@ import { PocAssignmentModule } from './poc-assignment/poc-assignment.module';
     EventModule,
     LocationModule,
     AnalyticsModule,
-    CounterModule,
-    PocAssignmentModule
+    PocAssignmentModule,
+    FloorplanModule
   ],
   controllers: [AppController],
   providers: [AppService,SocketGateway],

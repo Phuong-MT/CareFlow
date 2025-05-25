@@ -1,8 +1,9 @@
 // src/poc-assignment/entities/poc-assignment.entity.ts
-import { Table, Column, Model, ForeignKey, BelongsTo } from 'sequelize-typescript';
+import { Table, Column, Model, ForeignKey, BelongsTo, DataType } from 'sequelize-typescript';
 import { User } from 'src/users/entities/user.entity';
 import { Event } from 'src/event/entities/event.entity';
 import { Location } from 'src/location/entities/location.entity';
+import { PocLocation } from './poc-location.entity';
 
 @Table({ tableName: 'poc_assignments' })
 export class PocAssignment extends Model {
@@ -17,6 +18,13 @@ export class PocAssignment extends Model {
   @ForeignKey(() => Location)
   @Column
   locationId: number;
+
+  @ForeignKey(() => PocLocation)
+  @Column({ type: DataType.INTEGER, allowNull: false })
+  pocLocationId: number;
+
+  @BelongsTo(() => PocLocation)
+  pocLocation: PocLocation;
 
   @Column({ defaultValue: 'poc' })
   role: string;

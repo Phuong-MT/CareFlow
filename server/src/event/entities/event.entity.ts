@@ -15,6 +15,9 @@ export class Event extends Model {
   @Column({ type: DataType.STRING, allowNull: false })
   title: string;
 
+  @Column({ type: DataType.STRING, allowNull: true })
+  description: string;
+
   @Column({ type: DataType.DATE, allowNull: false })
   dateStart: Date;
 

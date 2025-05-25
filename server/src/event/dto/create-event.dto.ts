@@ -6,6 +6,8 @@ export class CreateEventDto {
   @IsString()
   title: string;
 
+  description: string;
+
   @IsNotEmpty()
   @Transform(({ value }) => new Date(value))
   @IsDate()

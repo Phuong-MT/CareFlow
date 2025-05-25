@@ -14,8 +14,8 @@ export class EventService {
  private readonly usersService: UsersService, ) {}
 
   async createEvent(createEventDto: CreateEventDto): Promise<Event> {
-    const {title, locationId, dateStart,dateEnd, tenantCode} = createEventDto
-    return this.eventModel.create({title, locationId, dateStart, dateEnd,  tenantCode});
+    const {title, locationId, dateStart,dateEnd, tenantCode, description} = createEventDto
+    return this.eventModel.create({title, locationId, description, dateStart, dateEnd,  tenantCode});
   }
 
   async findAllEvent(userId: string ,page: number = 1, limit: number = 10): Promise<{ events: Event[]; total: number; page: number; limit: number }> {
