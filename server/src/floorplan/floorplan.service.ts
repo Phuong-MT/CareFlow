@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { FloorPlan } from 'src/floorplan/entities/floorplan.entity';
 import { PocLocation } from 'src/poc-assignment/entities/poc-location.entity';
@@ -15,6 +15,27 @@ export class FloorplanService {
     @InjectModel(PocLocation)
     private pocLocationModel: typeof PocLocation,
   ) {}
+  
+  async createFloorPlan(eventCode: string, image : Express.Multer.File,name: string) {
+    if (!image) {
+    throw new BadRequestException('Image file is required');
+    }
+    const floorPlanImageUrl = `/uploads/floorplans/${image.filename}`;
+
+    const existingFloorPlan = await this.floorPlanModel.findOne({ where: { eventCode } });
+
+    if (existingFloorPlan) {
+      throw new InternalServerErrorException('Floor plan already exists for this event code');
+    }
+
+    const floorPlan = await this.floorPlanModel.create({
+      name,
+      eventCode,
+      floorPlanImageUrl,
+    });
+
+    return floorPlan;
+  }
 
   async uploadFloorPlan(eventCode: string, image: Express.Multer.File) {
     const floorPlanImageUrl = `/uploads/floorplans/${image.filename}`;

@@ -20,7 +20,17 @@ export class FloorplanController {
   constructor(private readonly floorPlanService: FloorplanService) {}
 
   @Post(':eventCode/image')
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(
+    FileInterceptor('floorPlanImage', {
+      storage: diskStorage({
+        destination: './uploads/floorplans',
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
   uploadImage(
     @Param('eventCode') eventCode: string,
     @UploadedFile(

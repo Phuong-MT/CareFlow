@@ -14,12 +14,22 @@ export default function CreateEventPage() {
   const router = useRouter();
 
   const [locations, setLocations] = useState<{ id: number; name: string }[]>([]);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    description: string;
+    dateStart: string;
+    dateEnd: string;
+    locationId: string;
+    floorPlanImage?: File | null;
+    tentantCode?: string ;
+  }>({
     title: '',
     description: '',
     dateStart: '',
     dateEnd: '',
     locationId: '',
+    floorPlanImage: null,
+    tentantCode: '',
   });
 
 useEffect(() => {
@@ -50,15 +60,23 @@ useEffect(() => {
       alert('Vui lòng chọn địa điểm');
       return;
     }
-    const payload = {
-        title: formData.title.trim(),
-        dateStart: new Date(formData.dateStart).toISOString(),
-        dateEnd: setDateEndToEndOfDay(formData.dateEnd),
-        tenantCode: tenantCode,
-        locationId: Number(formData.locationId),
-        description: formData.description.trim() || null,
-    };
-    const res = await api.post('/events/createEvent', payload);
+    if (!formData.floorPlanImage) {
+    alert('Vui lòng chọn file floorplan map');
+    return;
+  }
+    const payload = new FormData();
+      payload.append('title', formData.title.trim());
+      payload.append('description', formData.description.trim() || '');
+      payload.append('dateStart', new Date(formData.dateStart).toISOString());
+      payload.append('dateEnd', setDateEndToEndOfDay(formData.dateEnd));
+      payload.append('tenantCode', tenantCode ?? '');
+      payload.append('locationId', formData.locationId);
+      payload.append('floorPlanImage', formData.floorPlanImage);
+    const res = await api.post('/events/createEvent', payload,{
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
 
     if (res.status === 201) {
       alert('Tạo sự kiện thành công!');
@@ -141,7 +159,20 @@ useEffect(() => {
             </SelectContent>
           </Select>
         </div>
-
+        {/* File ảnh floorplan */}
+          <div>
+            <Label className="block font-medium" htmlFor="floorPlanImage">Floorplan Map</Label>
+            <Input
+              id="floorPlanImage"
+              type="file"
+              accept="image/*"
+              onChange={e => {
+                if (e.target.files && e.target.files.length > 0) {
+                  setFormData(prev => ({ ...prev, floorPlanImage: e.target.files![0] }));
+                }
+              }} 
+            />
+          </div>
         {/* Submit */}
         <Button type="submit" className="w-full">
           Tạo sự kiện

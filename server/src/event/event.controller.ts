@@ -1,10 +1,13 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, Query, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, Query, UseGuards, Request, UseInterceptors, ParseFilePipeBuilder, UploadedFile, HttpStatus } from '@nestjs/common';
 import { EventService } from './event.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { Roles } from 'src/common/roles.decorator';
 import { RolesGuard } from 'src/common/roles.guard';
 import { JwtAuthGuard } from 'src/users/passport/jwt-auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 @Controller('events')
 @UseGuards(JwtAuthGuard,RolesGuard)
@@ -13,8 +16,25 @@ export class EventController {
 
   @Post('createEvent')
   @Roles('super_admin', 'admin')
-  createEvent(@Body() createEventDto: CreateEventDto) {
-    return this.eventService.createEvent(createEventDto);
+  @UseInterceptors(FileInterceptor('floorPlanImage', {
+      storage: diskStorage({
+        destination: './uploads/floorplans',
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
+        },
+      }),
+    }),)
+  createEvent(@Body() createEventDto: CreateEventDto,
+      @UploadedFile(
+        new ParseFilePipeBuilder()
+          .addMaxSizeValidator({ maxSize: 5 * 1024 * 1024 }) 
+          .addFileTypeValidator({ fileType: 'image/*' })    
+          .build({
+            errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+          }),
+      ) image: Express.Multer.File) {
+    return this.eventService.createEvent(createEventDto, image);
   }
 
   @Get('findAllEvent')

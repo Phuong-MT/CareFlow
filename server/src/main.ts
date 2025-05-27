@@ -3,8 +3,10 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { WsAdapter } from './utils/ws-adapter';
+import { join } from 'path';
+import { NestExpressApplication } from '@nestjs/platform-express';
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
@@ -26,7 +28,11 @@ async function bootstrap() {
       //yamlDocumentUrl: '/api.yaml',
       jsonDocumentUrl: '/api.json',
     }); 
-  app.useWebSocketAdapter(new WsAdapter(app));      
+  app.useWebSocketAdapter(new WsAdapter(app));  
+
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+  prefix: '/uploads/',
+  });    
   await app.listen(process.env.PORT , () => {
     console.log(`Our server is listening on PORT: ${process.env.PORT}`);
   });

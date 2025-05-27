@@ -23,6 +23,5 @@ export class CreateEventDto {
   tenantCode: string;
 
   @IsNotEmpty()
-  @IsNumber()
   locationId: number;
 }

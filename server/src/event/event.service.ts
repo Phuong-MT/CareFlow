@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Event } from './entities/event.entity';
 import { CreateEventDto} from './dto/create-event.dto';
@@ -7,15 +7,24 @@ import { Tenant } from '../tenant/entities/tenant.entity';
 import { Location } from '../location/entities/location.entity';
 import { UsersService } from 'src/users/users.service';
 import { off } from 'process';
+import { FloorplanService } from 'src/floorplan/floorplan.service';
 
 @Injectable()
 export class EventService {
   constructor(@InjectModel(Event) private eventModel: typeof Event,
- private readonly usersService: UsersService, ) {}
+  private readonly floorPlanService: FloorplanService,
+  private readonly usersService: UsersService,
+) {}
 
-  async createEvent(createEventDto: CreateEventDto): Promise<Event> {
+  async createEvent(createEventDto: CreateEventDto, image: Express.Multer.File): Promise<Event> {
     const {title, locationId, dateStart,dateEnd, tenantCode, description} = createEventDto
-    return this.eventModel.create({title, locationId, description, dateStart, dateEnd,  tenantCode});
+    console.log(image);
+    const event = await this.eventModel.create({title, locationId, description, dateStart, dateEnd,  tenantCode});
+    const floorplan  = await this.floorPlanService.createFloorPlan(event.id, image,event.title)
+    if(!floorplan || !event) {
+      throw new BadRequestException('create event failed');
+    }
+    return event;
   }
 
   async findAllEvent(userId: string ,page: number = 1, limit: number = 10): Promise<{ events: Event[]; total: number; page: number; limit: number }> {
