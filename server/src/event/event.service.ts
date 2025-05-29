@@ -6,9 +6,9 @@ import { UpdateEventDto } from './dto/update-event.dto';
 import { Tenant } from '../tenant/entities/tenant.entity';
 import { Location } from '../location/entities/location.entity';
 import { UsersService } from 'src/users/users.service';
-import { off } from 'process';
+import {FloorPlan} from 'src/floorplan/entities/floorplan.entity'
 import { FloorplanService } from 'src/floorplan/floorplan.service';
-
+import { PocLocation } from 'src/poc-assignment/entities/poc-location.entity';
 @Injectable()
 export class EventService {
   constructor(@InjectModel(Event) private eventModel: typeof Event,
@@ -57,9 +57,23 @@ export class EventService {
     return { events, total, page, limit };
   }
 
-  async findOneEvent(id: number): Promise<Event> {
-    const event = await this.eventModel.findByPk(id);
-    if (!event) throw new NotFoundException('Event not found');
+  async findOneEvent(id: number, userId: string): Promise<Event> {
+      const user = await this.usersService.findId(userId);
+      if(!user){
+         throw new NotFoundException('UserId not found');
+      }
+      const event = await this.eventModel.findOne({
+        where:{id, tenantCode: user.tenantCode},
+          include: [{
+            model: FloorPlan,
+            include: [{model: PocLocation}],
+          }]
+        });
+
+    if (!event) {
+      throw new NotFoundException('Event not found');
+      }
+
     return event;
   }
 
@@ -67,8 +81,8 @@ export class EventService {
     return this.eventModel.update(updateEventDto, { where: { id } });
   }
 
-  async removeEvent(id: number): Promise<void> {
-    const event = await this.findOneEvent(id);
-    await event.destroy();
-  }
+  // async removeEvent(id: number): Promise<void> {
+  //   const event = await this.findOneEvent(id);
+  //   await event.destroy();
+  // }
 }

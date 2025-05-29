@@ -23,6 +23,30 @@ interface EventState{
         total: number;
     };
 }
+interface floorPlan{
+  id: number;
+  name: string;
+  floorPlanImageUrl: string;
+  pocLoc:PocLocation[];
+}
+interface PocLocation{
+  id: number;
+  name: string;
+  x:number;
+  y:number;
+  floorPlanId: number;
+}
+interface EventDetail{
+  tenantCode: string;
+    locationId: number;
+    title: string;
+    dateStart: string;
+    dateEnd: string;
+    id: number;
+    floorPlan: floorPlan;
+    tenant?: Tenant;
+    location?: Location;
+}
 interface EventApiResponse {
   events: Event[];
   total: number;
@@ -35,4 +59,4 @@ interface EventRequest{
     page:number;
     limit:number;
 }
-export type {Event, EventRequest, EventState, EventStatus, EventApiResponse}
+export type {Event, EventRequest, EventState, EventStatus, EventApiResponse, floorPlan,EventDetail, PocLocation}

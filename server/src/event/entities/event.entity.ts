@@ -1,7 +1,8 @@
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo, HasMany } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, ForeignKey, BelongsTo, HasMany, HasOne } from 'sequelize-typescript';
 import { Tenant } from 'src/tenant/entities/tenant.entity';
 import {Location} from 'src/location/entities/location.entity'
 import { Queue } from 'src/queue/entities/queue.entity';
+import { FloorPlan } from 'src/floorplan/entities/floorplan.entity';
 @Table({ tableName: 'events' })
 export class Event extends Model {
   @ForeignKey(() => Tenant)
@@ -31,4 +32,6 @@ export class Event extends Model {
   location: Location;
   @HasMany(() => Queue)
   queues: Queue[];
+  @HasOne(() => FloorPlan)
+  floorPlan : FloorPlan
 }

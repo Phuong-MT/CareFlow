@@ -35,54 +35,38 @@ export const  MenuSidebar = {
   ],
   navMain: [
     {
-      title: "Playground",
-      url: "/admin",
-      icon: SquareTerminal,
+      title: "Event",
+      url: "/admin/events",
+      icon: BookOpen,
       isActive: true,
       items: [
         {
-          title: "Event",
-          url: "/events",
+           title: "Event List",
+          url: "/",
         },
         {
-          title: "Analytics",
-          url: "/analys",
-        },
-        {
-           title: "Poc Assignment",
-          url: "/poc-assignment",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
+          title: "Create Event",
+          url: "/create",
         },
       ],
     },
   ],
   projects: [
+    {
+      name: "Poc-assignment",
+      url: "/admin/poc-assignment",
+      icon: Bot,
+    },
+    {
+      name: "Analytics ",
+      url: "/admin/analys",
+      icon: Bot,
+    },
+    {
+      name: "Account",
+      url: "/admin/account",
+      icon: Map,
+    },
   ],
 }
 export const MenuSidebarPoc = {

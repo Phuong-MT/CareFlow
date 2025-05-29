@@ -51,8 +51,10 @@ export class EventController {
 
   @Get('findOneEvent/:id')
   @Roles('super_admin', 'admin')
-  findOneEvent(@Param('id') id: string) {
-    return this.eventService.findOneEvent(+id);
+  findOneEvent(@Param('id') id: string,
+    @Request() req: any
+) {
+    return this.eventService.findOneEvent(+id, req.user.id);
   }
 
   @Put('updateEvent/:id')
@@ -61,9 +63,9 @@ export class EventController {
     return this.eventService.updateEvent(+id, updateEventDto);
   }
 
-  @Delete('removeEvent/:id')
-  @Roles('super_admin', 'admin')
-  removeEvent(@Param('id') id: string) {
-    return this.eventService.removeEvent(+id);
-  }
+  // @Delete('removeEvent/:id')
+  // @Roles('super_admin', 'admin')
+  // removeEvent(@Param('id') id: string) {
+  //   return this.eventService.removeEvent(+id);
+  // }
 }

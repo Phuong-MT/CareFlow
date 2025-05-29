@@ -14,3 +14,15 @@ export const apiGetAllEvents = async(payload: EventRequest) => {
       throw error;
     }
   }
+
+
+export const apiGetFindOneEvent = async(payload : any) => {
+  try{
+    const response = await api.get(`findOneEvent/${payload.eventId}`);
+    return response;
+  }catch(error){
+    console.error("Find event failed : ", error);
+    throw error;
+  }
+
+}

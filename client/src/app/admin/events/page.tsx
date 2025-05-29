@@ -94,7 +94,8 @@ export default function EventsPage() {
                       <span>{new Date(event.dateStart).toLocaleDateString()} - {new Date(event.dateEnd).toLocaleDateString()}</span>
                     </div>
 
-                    {status !== 'ended' && (
+                    <div className='flex flex-col'>
+                      {status !== 'ended' && (
                       <div className="pt-3">
                         <Button
                           variant="outline"
@@ -104,7 +105,18 @@ export default function EventsPage() {
                           Xem Realtime
                         </Button>
                       </div>
+                      
                     )}
+                    <div className="pt-3">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => router.push(`/admin/events/${roomId}/event-detail`)}
+                        >
+                          Xem chi tiết
+                        </Button>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               );
