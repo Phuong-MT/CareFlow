@@ -7,11 +7,12 @@ import {
   Get,
   Param,
   ParseFilePipeBuilder,
-  HttpStatus
+  HttpStatus,
+  Put
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FloorplanService } from './floorplan.service';
-import { FloorPlanDto } from './dto/create-floorplan.dto';
+import { FloorPlanDto, UpdatePocLocationsRequest } from './dto/create-floorplan.dto';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 
@@ -50,7 +51,14 @@ export class FloorplanController {
    async saveFloorPlan(@Body() floorPlanDto: FloorPlanDto) {
     return this.floorPlanService.saveFloorPlan(floorPlanDto);
   }
-
+  @Put('/:id/update-pocLoc')
+  async updatePocLocations(
+    @Param('id') floorPlanId: number,
+    @Body() body: UpdatePocLocationsRequest,
+  ) {
+    console.log(body.pocLocations)
+    return this.floorPlanService.updatePocLocations(floorPlanId, body.pocLocations);
+  }
   @Get(':eventCode')
   getFloorPlanWithLocations(@Param('eventCode') eventCode: string) {
     return this.floorPlanService.getWithLocations(eventCode);

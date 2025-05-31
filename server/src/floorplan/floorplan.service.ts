@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, InternalServerErrorException, NotFound
 import { InjectModel } from '@nestjs/sequelize';
 import { FloorPlan } from 'src/floorplan/entities/floorplan.entity';
 import { PocLocation } from 'src/poc-assignment/entities/poc-location.entity';
-import { FloorPlanDto } from './dto/create-floorplan.dto';
+import { FloorPlanDto, UpdatePocLocationDto } from './dto/create-floorplan.dto';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -39,7 +39,7 @@ export class FloorplanService {
 
   async uploadFloorPlan(eventCode: string, image: Express.Multer.File) {
     const floorPlanImageUrl = `/uploads/floorplans/${image.filename}`;
-
+    console.log('abc')
     let floorPlan = await this.floorPlanModel.findOne({ where: { eventCode } });
 
     if (floorPlan) {
@@ -99,4 +99,35 @@ export class FloorplanService {
 
     return floorPlan;
   }
+
+  async updatePocLocations(floorPlanId: number, pocLocations: UpdatePocLocationDto[]) {
+    const floorPlan = await this.floorPlanModel.findByPk(floorPlanId);
+    if (!floorPlan) throw new NotFoundException('FloorPlan not found');
+    const updatedPocs: PocLocation[] = [];
+
+    for (const poc of pocLocations) {
+      if (poc.id) {
+        const existing = await this.pocLocationModel.findByPk(poc.id);
+        if (existing) {
+          await existing.update({
+            name: poc.name,
+            x: poc.x,
+            y: poc.y,
+          });
+          updatedPocs.push(existing);
+        }
+      } else {
+        const newPoc = await this.pocLocationModel.create({
+          name: poc.name,
+          x: poc.x,
+          y: poc.y,
+          floorPlanId: poc.floorPlanId,
+        });
+        updatedPocs.push(newPoc);
+      }
+    }
+
+    return { message: 'POC locations updated', pocLocations: updatedPocs };
+  }
+
 }

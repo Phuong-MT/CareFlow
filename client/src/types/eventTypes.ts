@@ -27,7 +27,7 @@ interface floorPlan{
   id: number;
   name: string;
   floorPlanImageUrl: string;
-  pocLoc:PocLocation[];
+  pocLocations:PocLocation[];
 }
 interface PocLocation{
   id: number;
