@@ -14,8 +14,10 @@ export class LocationController {
   
   @Post('/create')
   @Roles(RoleEnum.ADMIN, RoleEnum.SUPER_ADMIN)
-  create(@Body() createLocationDto: CreateLocationDto) {
-    return this.locationService.create(createLocationDto);
+  create(@Body() createLocationDto: CreateLocationDto,
+          @Request() req: any
+) {
+    return this.locationService.create(createLocationDto,req.user.id);
   }
 
   @Get('/findAll')

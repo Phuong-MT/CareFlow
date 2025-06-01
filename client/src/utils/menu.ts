@@ -48,6 +48,10 @@ export const  MenuSidebar = {
           title: "Create Event",
           url: "/create",
         },
+        {
+          title: "Create Location",
+          url: "/Location_create",
+        },
       ],
     },
   ],

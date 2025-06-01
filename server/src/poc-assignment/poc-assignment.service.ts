@@ -44,4 +44,19 @@ export class PocAssignmentService {
       throw new Error(err);
     }
   }
+  async assignPoc(
+    userId: string,
+    eventId: number,
+    locationId: number,
+    pocLocationId: number,
+  ): Promise<PocAssignment> {
+    const pocAssignment = await this.pocAssignmentModel.create({
+      userId,
+      eventId,
+      locationId,
+      pocLocationId,
+      isActive: true,
+    });
+    return pocAssignment;
+  }
 }

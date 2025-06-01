@@ -3,160 +3,84 @@
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Checkbox } from '@/components/ui/checkbox'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card } from '@/components/ui/card'
-import { toast } from 'sonner'
-import {getPocUser} from '@/store/pocAssignmentSlide'
-import { useAppSelector,useAppDispatch } from '@/hooks/config'
+import { useAppSelector, useAppDispatch } from '@/hooks/config'
+import { getPocUser } from '@/store/pocAssignmentSlide'
 import { getAllEvents } from '@/store/eventSlide'
 import PaginationControls from '@/components/admin/paginationControls'
-import { EventRequest, Event } from '@/types/eventTypes'
+import { EventRequest } from '@/types/eventTypes'
+import Image from 'next/image'
+import api from '@/utils/axiosConfig'
+import { set } from 'zod'
 
 export default function AssignPocPage() {
   const [selectedUserId, setSelectedUserId] = useState<string | undefined>()
-  const [selectedEventIds, setSelectedEventIds] = useState<Set<number>>(new Set())
+  const [selectedEventId, setSelectedEventId] = useState<number | undefined>()
+  const [selectedPocLocationId, setSelectedPocLocationId] = useState<number | undefined>()
+  const [locationId, setLocationId] = useState<number | undefined>()
   const [loading, setLoading] = useState(false)
-  const { events, pagination } = useAppSelector((state) => state.events);
-  const { dataPocUser } = useAppSelector((state) => state.poc);
+
+  const { events, pagination } = useAppSelector(state => state.events)
+  const { dataPocUser } = useAppSelector(state => state.poc)
   const tenantCode = useAppSelector(state => state.user?.user?.tenantCode)
   const dispatch = useAppDispatch()
-  const [page, setPage] = useState(1);
-    const limit = 10;
-  useEffect(()=>{
-    const fetchData = async ()=>{
-      await dispatch(getPocUser());
-      await dispatch(getAllEvents({ tenantCode, page, limit } as EventRequest))
-    }
-    fetchData()
-  },[])
+  const [page, setPage] = useState(1)
+  const limit = 10
 
+  useEffect(() => {
+    dispatch(getPocUser())
+    dispatch(getAllEvents({ tenantCode, page, limit } as EventRequest))
 
-  const handleToggleEvent = (eventId: number) => {
-    setSelectedEventIds(prev => {
-      const next = new Set(prev)
-      next.has(eventId) ? next.delete(eventId) : next.add(eventId)
-      return next
-    })
-  }
+  }, [dispatch, tenantCode, page])
 
+  const selectedEvent = events ? events.find(ev => ev.id === selectedEventId) : undefined
 
   const handleAssign = async () => {
-    if (!selectedUserId || selectedEventIds.size === 0) {
-      toast.warning('Vui lòng chọn người dùng và ít nhất 1 sự kiện.')
+    if (!selectedUserId || !selectedEventId || !selectedPocLocationId || !locationId) {
+      alert('Vui lòng chọn đầy đủ người dùng, sự kiện và vị trí.')
       return
     }
-
+    console.log(
+      `Assigning POC: User ID: ${selectedUserId}, Event ID: ${selectedEventId}, Location ID: ${locationId}, POC Location ID: ${selectedPocLocationId}`
+    )
     try {
       setLoading(true)
-      console.log('selectedUserId', selectedUserId)
-//await apiAssignPocToEvents(Number(selectedUserId), Array.from(selectedEventIds))
-      toast.success('Phân công thành công!')
-      setSelectedUserId(undefined)
-      setSelectedEventIds(new Set())
+      const res = await api.post(`/poc-assignment/userId/${selectedUserId}/event/${selectedEventId}/location/${locationId}/assign/${selectedPocLocationId}`)
+      if(res.status === 200){
+        alert('Phân công thành công!')
+        setSelectedUserId(undefined)
+        setSelectedEventId(undefined)
+        setSelectedPocLocationId(undefined)
+      }
+      else{
+        alert('Phân công thất bại.')
+      }
     } catch (err) {
-      toast.error('Phân công thất bại.')
+      alert('Phân công thất bại.')
     } finally {
       setLoading(false)
     }
   }
-
- const mockEvents: Event[] = [
-  {
-    id: 1,
-    tenantCode: 'TENANT001',
-    locationId: 101,
-    title: 'Khám tổng quát định kỳ',
-    dateStart: '2025-06-01T08:00:00Z',
-    dateEnd: '2025-06-01T11:00:00Z',
-  },
-  {
-    id: 2,
-    tenantCode: 'TENANT002',
-    locationId: 102,
-    title: 'Tư vấn sức khỏe tâm lý',
-    dateStart: '2025-06-02T13:00:00Z',
-    dateEnd: '2025-06-02T16:00:00Z',
-  },
-  {
-    id: 3,
-    tenantCode: 'TENANT003',
-    locationId: 103,
-    title: 'Tiêm phòng vaccine mùa hè',
-    dateStart: '2025-06-03T09:30:00Z',
-    dateEnd: '2025-06-03T12:00:00Z',
-  },
-  {
-    id: 4,
-    tenantCode: 'TENANT001',
-    locationId: 101,
-    title: 'Khám chuyên khoa da liễu',
-    dateStart: '2025-06-04T10:00:00Z',
-    dateEnd: '2025-06-04T12:30:00Z',
-  },
-  {
-    id: 5,
-    tenantCode: 'TENANT004',
-    locationId: 104,
-    title: 'Tư vấn dinh dưỡng cho trẻ em',
-    dateStart: '2025-06-05T14:00:00Z',
-    dateEnd: '2025-06-05T17:00:00Z',
-  },
-  {
-    id: 6,
-    tenantCode: 'TENANT005',
-    locationId: 105,
-    title: 'Khám mắt cộng đồng',
-    dateStart: '2025-06-06T07:30:00Z',
-    dateEnd: '2025-06-06T10:30:00Z',
-  },
-  {
-    id: 7,
-    tenantCode: 'TENANT006',
-    locationId: 106,
-    title: 'Khám tầm soát ung thư',
-    dateStart: '2025-06-07T09:00:00Z',
-    dateEnd: '2025-06-07T12:00:00Z',
-  },
-  {
-    id: 8,
-    tenantCode: 'TENANT003',
-    locationId: 103,
-    title: 'Khám nội tổng hợp',
-    dateStart: '2025-06-08T08:00:00Z',
-    dateEnd: '2025-06-08T11:00:00Z',
-  },
-  {
-    id: 9,
-    tenantCode: 'TENANT002',
-    locationId: 102,
-    title: 'Tư vấn sức khỏe tiền sản',
-    dateStart: '2025-06-09T13:00:00Z',
-    dateEnd: '2025-06-09T15:30:00Z',
-  },
-  {
-    id: 10,
-    tenantCode: 'TENANT004',
-    locationId: 104,
-    title: 'Tiêm chủng cho người lớn',
-    dateStart: '2025-06-10T10:00:00Z',
-    dateEnd: '2025-06-10T12:00:00Z',
-  },
-];
-
+  const formatTime = (isoString: string) => {
+    const date = new Date(isoString)
+    return date.toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' })
+  }
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-6">
+    <div className="w-full mx-auto p-6 space-y-6">
       <h2 className="text-2xl font-semibold">Phân công POC cho sự kiện</h2>
 
       <div className="space-y-2">
         <label className="text-sm font-medium">Chọn người dùng POC</label>
-        <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+        <Select value={selectedUserId ?? ""}
+            onValueChange={(value) => {
+              setSelectedUserId(value || undefined);
+            }}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Chọn người dùng" />
           </SelectTrigger>
           <SelectContent>
             {dataPocUser.map(user => (
-              <SelectItem key={user.id} value={user.id.toString()}>
+              <SelectItem key={user.id} value={user.id}>
                 {user.name || user.email}
               </SelectItem>
             ))}
@@ -166,34 +90,97 @@ export default function AssignPocPage() {
 
       <div className="space-y-2">
         <label className="text-sm font-medium">Chọn sự kiện</label>
-        {mockEvents && <ScrollArea className="h-64 rounded border p-2">
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            {mockEvents.map(event => (
-              <Card
-                key={event.id}
-                className="flex items-center gap-2 p-2 cursor-pointer hover:bg-muted transition"
-                onClick={() => handleToggleEvent(event.id)}
+        <Select
+          value={selectedEventId ? `${selectedEventId}-${locationId ?? ""}` : ""}
+          onValueChange={(value) => {
+            const [idStr, locationIdStr] = value.split("-");
+            setSelectedEventId(idStr ? Number(idStr) : undefined);
+            setLocationId(locationIdStr ? Number(locationIdStr) : undefined);
+          }}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Chọn sự kiện" />
+          </SelectTrigger>
+          <SelectContent>
+            {events &&
+              events.map((event) => (
+                <SelectItem
+                  key={event.id}
+                  value={`${event.id}-${event.locationId}`}
+                >
+                  {event.title}
+                </SelectItem>
+              ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {selectedEvent && (
+        <Card className="p-4 space-y-4">
+          <div>
+            <h3 className="font-semibold text-lg">{selectedEvent.title}</h3>
+            <p className="text-sm text-muted-foreground">
+              {formatTime(selectedEvent.dateStart)} - {formatTime(selectedEvent.dateEnd)}
+            </p>
+            <p className="text-sm">{selectedEvent?.location?.name} - {selectedEvent?.location?.address}</p>
+          </div>
+
+           <div className="relative w-full max-w-[600px] h-full aspect-video border rounded overflow-hidden">
+            <Image
+              src={`${process.env.NEXT_PUBLIC_SERVER_URL}${selectedEvent.floorPlan.floorPlanImageUrl}`}
+              alt="Floor Plan"
+              fill
+              className="object-contain"
+            />
+
+            {selectedEvent.floorPlan.pocLocations.map((poc) => (
+              <div
+                key={poc.id}
+                className="absolute w-4 h-4 bg-red-500 rounded-full border border-white text-xs flex items-center justify-center"
+                style={{
+                  left: `${poc.x}%`,
+                  top: `${poc.y}%`,
+                  transform: 'translate(-50%, -50%)',
+                }}
+                title={poc.name}
               >
-                <Checkbox
-                  checked={selectedEventIds.has(event.id)}
-                  onCheckedChange={() => handleToggleEvent(event.id)}
-                  id={`event-${event.id}`}
-                />
-                <label htmlFor={`event-${event.id}`} className="text-sm font-medium">
-                  {event.title} - {event.location?.name}
-                </label>
-              </Card>
+                {poc.name}
+              </div>
             ))}
           </div>
-        </ScrollArea>}
-        {events === null || events.length === 0 && <p className="text-sm text-muted-foreground">Không có sự kiện nào.</p>}
-      </div>
-          <PaginationControls
-                    currentPage={pagination.page}
-                    totalPages={Math.ceil(pagination.total / pagination.limit)}
-                    onPageChange={setPage}
-                  />
-      <Button onClick={handleAssign}  disabled={loading || !selectedUserId || selectedEventIds.size === 0}>
+
+          {selectedEvent.floorPlan?.pocLocations?.length > 0 && (
+            <div>
+              <label className="text-sm font-medium">Chọn vị trí check-in:</label>
+              <Select 
+               value={selectedPocLocationId?.toString() ?? ""}
+              onValueChange={(value) => {
+                setSelectedPocLocationId(value ? Number(value) : undefined);
+              }}
+              disabled={!selectedEvent}>
+                <SelectTrigger className="w-full mt-1">
+                  <SelectValue placeholder="Chọn vị trí" />
+                </SelectTrigger>
+                <SelectContent>
+                  {selectedEvent.floorPlan.pocLocations.map(loc => (
+                    <SelectItem key={loc.id} value={loc.id.toString()}>
+                      {loc.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+        </Card>
+      )}
+
+      <PaginationControls
+        currentPage={pagination.page}
+        totalPages={Math.ceil(pagination.total / pagination.limit)}
+        onPageChange={setPage}
+      />
+
+      <Button onClick={handleAssign} disabled={loading}>
         {loading ? 'Đang phân công...' : 'Phân công'}
       </Button>
     </div>

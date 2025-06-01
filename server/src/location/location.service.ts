@@ -14,8 +14,17 @@ export class LocationService {
               @InjectModel(User) private userModel : typeof User
   ) {}
 
-  async create(createLocationDto: CreateLocationDto): Promise<Location> {
-    const {tenantCode, name, address} = createLocationDto
+  async create(createLocationDto: CreateLocationDto, userId: string): Promise<Location> {
+    const user = await this.userModel.findByPk(userId)
+    if(!user){
+      throw new BadRequestException( transformError(
+                 `user : ${userId}`, 
+                 ERROR_TYPE.NOT_FOUND
+               )
+             );
+    }
+    const tenantCode = user.tenantCode
+    const {name, address} = createLocationDto
     const existingTenant = await this.tenantModel.findOne({
       where: {tenantCode}
     });

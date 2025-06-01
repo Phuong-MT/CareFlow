@@ -37,6 +37,7 @@ export class EventService {
         tenantCode
       },
       order: [['createdAt', 'DESC']],
+
       include: [
         {
           model: Tenant,
@@ -45,6 +46,11 @@ export class EventService {
         {
           model: Location,
           attributes: ['id', 'name', 'address'],
+        },
+        {
+          model: FloorPlan,
+          attributes: ['id', 'name', 'floorPlanImageUrl'],
+          include: [{ model: PocLocation, attributes: ['id', 'name', 'x', 'y','floorPlanId'] }],
         }
       ],
      });

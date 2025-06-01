@@ -14,7 +14,7 @@ interface Tenant {
   name: string;
 }
 interface EventState{
-    events: Event[] | null,
+    events: EventDetail[] | null,
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
     error: string | null;
     pagination: {
@@ -37,7 +37,7 @@ interface PocLocation{
   floorPlanId: number;
 }
 interface EventDetail{
-  tenantCode: string;
+    tenantCode: string;
     locationId: number;
     title: string;
     dateStart: string;
@@ -48,7 +48,7 @@ interface EventDetail{
     location?: Location;
 }
 interface EventApiResponse {
-  events: Event[];
+  events: EventDetail[];
   total: number;
   page: number;
   limit: number;

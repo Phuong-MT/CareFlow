@@ -16,7 +16,7 @@ interface ResponsePOC{
 }
 
 interface PocUser {
-  id: number;
+  id: string;
   email: string;
   name?: string;
   role:string;

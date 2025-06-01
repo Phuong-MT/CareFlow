@@ -19,11 +19,21 @@ export class PocAssignmentController {
   
   // phan cong
   @Roles(RoleEnum.POC, RoleEnum.ADMIN, RoleEnum.SUPER_ADMIN)
-  @Post()
-  async create(){
-    
+  @Post('userId/:userId/event/:eventId/location/:locationId/assign/:poc_location')
+  async assignPoc(
+    @Param('userId') userId: string,
+    @Param('eventId') eventId: number,
+    @Param('locationId') locationId: number,
+    @Param('poc_location') pocLocation: number,
+  ) {
+    try {
+      return await this.pocAssignmentService.assignPoc(userId, eventId, locationId, pocLocation);
+    } catch (err) {
+      throw new BadRequestException(err.message);
+    }
   }
-  
+    
+
  @Roles(RoleEnum.POC, RoleEnum.ADMIN, RoleEnum.SUPER_ADMIN)
   @Patch('poc/active')
   async updatePocAssignment(@Request() req: any, @Body() body:{
