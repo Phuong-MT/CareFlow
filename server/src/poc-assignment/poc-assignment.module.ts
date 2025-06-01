@@ -6,9 +6,13 @@ import { PocAssignment } from './entities/poc-assignment.entity';
 import { UsersModule } from 'src/users/users.module';
 import { JwtStrategy } from 'src/users/passport/jwt.strategy';
 import { RolesGuard } from 'src/common/roles.guard';
+import { PocLocation } from './entities/poc-location.entity';
+import { FloorPlan } from 'src/floorplan/entities/floorplan.entity';
+import { Event } from 'src/event/entities/event.entity';
+import { Location } from 'src/location/entities/location.entity';
 
 @Module({
-  imports: [SequelizeModule.forFeature([PocAssignment]), UsersModule],
+  imports: [SequelizeModule.forFeature([PocAssignment,PocLocation,Event,FloorPlan,Location]), UsersModule],
   controllers: [PocAssignmentController],
   providers: [PocAssignmentService,JwtStrategy, RolesGuard],
   exports: [PocAssignmentService],

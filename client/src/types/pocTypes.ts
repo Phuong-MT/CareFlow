@@ -1,12 +1,15 @@
-import {Event} from './eventTypes';
+import {EventDetail, PocLocation, } from './eventTypes';
+import {Location} from './locationTypes';
 interface PocAssignmentType{
     id: number;
     userId: string;
     eventId: number;
     locationId: number;
     isActive: boolean;
-    event: Event;
-    //location: Location;
+    event: EventDetail;
+    location: Location;
+    pocLocation: PocLocation;
+    pocLocationId: number;
 }
 interface ResponsePOC{
     dataPocAssignment: PocAssignmentType[];

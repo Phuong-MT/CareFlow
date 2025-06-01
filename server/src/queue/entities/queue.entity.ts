@@ -4,6 +4,7 @@ import { User } from 'src/users/entities/user.entity';
 import { Location } from 'src/location/entities/location.entity';
 import { QueueEnum } from 'src/common/commonEnum';
 import {Event} from 'src/event/entities/event.entity'
+import { PocLocation } from 'src/poc-assignment/entities/poc-location.entity';
 @Table({ tableName: 'queues' })
 export class Queue extends Model {
   @ForeignKey(() => Tenant)
@@ -20,6 +21,10 @@ export class Queue extends Model {
 
   @ForeignKey(()=> Event)
   eventId: number
+
+  @ForeignKey(() => PocLocation)
+  @Column({ type: DataType.INTEGER, allowNull: true })
+  pocLocationId: number;
 
   @Column({type: DataType.STRING, allowNull: false})
   nameUser: string

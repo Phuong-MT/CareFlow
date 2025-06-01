@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Queue } from './entities/queue.entity';
 import { CreateQueueDto } from './dto/create-queue.dto';
 import { UpdateQueueDto } from './dto/update-queue.dto'
-
+import { QueueEnum } from 'src/common/commonEnum';
 @Injectable()
 export class QueueService {
   constructor(@InjectModel(Queue) private queueModel: typeof Queue) {}
@@ -65,8 +65,30 @@ export class QueueService {
     const result =await this.queueModel.findAll({
       attributes: ['userId', 'nameUser', 'status', 'position', 'queueDate'], 
       where:
-      { tenantCode: payload.tenantCode, locationId: payload.locationId, eventId: payload.eventId, queueDate: new Date() }
+      { tenantCode: payload.tenantCode, locationId: payload.locationId, eventId: payload.eventId, queueDate: new Date(), status: [QueueEnum.PENDING, QueueEnum.SERVING] },
     })
     return result
+  }
+  async findFirstWaiting(tenantCode: string, eventId: string, locationId: string): Promise<Queue | null> {
+    return this.queueModel.findOne({
+      where: {
+        status: QueueEnum.PENDING,
+        tenantCode,
+        eventId,
+        locationId
+      },
+      order: [['createdAt', 'ASC']],
+    });
+  }
+
+  async updateStatus(queueId: number, pocLocationId: number,status: string) {
+    return this.queueModel.update({ status, pocLocationId }, { where: { id: queueId } });
+  }
+
+  async getQueueByPoc(pocLocationId: number) {
+    return this.queueModel.findAll({
+      where: { pocLocationId },
+      order: [['createdAt', 'ASC']],
+    });
   }
 }

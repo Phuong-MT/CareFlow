@@ -13,6 +13,7 @@ import {
   import { Data } from './type';
   import {QueueService} from 'src/queue/queue.service'
   import { SocketState } from './type';
+import { QueueEnum } from 'src/common/commonEnum';
   @WebSocketGateway(3002,{
     // cors: process.env.NEXT_PUBLIC_CLIENT_URL || 'https://localhost:3000',
     cors: '*'
@@ -85,5 +86,40 @@ import {
 
       return { success: true, message: 'New check_in received' };
     }
+  @SubscribeMessage(SocketState.CALL_NEXT)
+  async handleCallNext(
+    @MessageBody() data: { 
+        pocLocationId: number,
+        tenantCode: string;
+        eventId: string;
+        locationId: string;
+     },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const { pocLocationId } = data;
+    const roomId = `${data.tenantCode}:${data.eventId}:${data.locationId}`;
+    const nextInQueue = await this.queueService.findFirstWaiting(data.tenantCode, data.eventId, data.locationId);
 
+    if (!nextInQueue) {
+      this.logger.warn('No one in the queue');
+      client.emit(SocketState.CALL_NEXT_ERROR, { message: 'Không có người trong hàng đợi' });
+      return;
+    }
+
+    await this.queueService.updateStatus(nextInQueue.id, pocLocationId,QueueEnum.SERVING);
+
+      this.server.to(roomId).emit(SocketState.CALL_NEXT_SUCCESS, {
+        data:{
+          userId: nextInQueue.userId,
+          nameUser: nextInQueue.nameUser,
+          pocLocationId: pocLocationId,
+          message: 'Đến lượt bạn, vui lòng di chuyển tới vị trí được chỉ định.',
+        },
+      });
+
+    const updatedQueue = await this.queueService.getQueueState({tenantCode: data.tenantCode,
+                                                                eventId: data.eventId,
+                                                                locationId: data.locationId});
+    this.server.emit(SocketState.QUEUE_STATE_UPDATE, updatedQueue);
   }
+}
