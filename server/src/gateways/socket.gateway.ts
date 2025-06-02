@@ -14,6 +14,7 @@ import {
   import {QueueService} from 'src/queue/queue.service'
   import { SocketState } from './type';
 import { QueueEnum } from 'src/common/commonEnum';
+import { subscribe } from 'diagnostics_channel';
   @WebSocketGateway(3002,{
     // cors: process.env.NEXT_PUBLIC_CLIENT_URL || 'https://localhost:3000',
     cors: '*'
@@ -121,5 +122,19 @@ import { QueueEnum } from 'src/common/commonEnum';
                                                                 eventId: data.eventId,
                                                                 locationId: data.locationId});
     this.server.emit(SocketState.QUEUE_STATE_UPDATE, updatedQueue);
+  }
+
+  @SubscribeMessage(SocketState.HANDLE_SUCCESS)
+  async handleSuccess(
+    @MessageBody() data: {queueId: number ; tenantCode: string; eventId: string; locationId: string, pocLocationId: number},
+    @ConnectedSocket() client: Socket,
+  ) {
+    const { queueId, tenantCode, eventId, locationId, pocLocationId } = data;
+    console.log(data)
+    const roomId = `${tenantCode}:${eventId}:${locationId}`;
+    this.logger.log(`Client ${client.id} handled success for queue ${queueId}`);
+    await this.queueService.updateStatus(queueId,pocLocationId ,QueueEnum.SUCCESS)
+    const updatedQueue = await this.queueService.getQueueState({tenantCode, eventId, locationId});
+    this.server.to(roomId).emit(SocketState.QUEUE_STATE_UPDATE, { updatedQueue });
   }
 }

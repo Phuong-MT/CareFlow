@@ -14,4 +14,6 @@ export enum SocketState{
     QUEUE_STATE_UPDATE = 'queue_state_update',
     CALL_NEXT_SUCCESS = 'call_next_success',
     CALL_NEXT_ERROR = 'call_next_error',
+    HANDLE_SUCCESS = 'handle_success',
+    HANDLE_ERROR = 'handle_error',    
 }
