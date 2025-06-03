@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, Query, UseGuards, Request, UseInterceptors, ParseFilePipeBuilder, UploadedFile, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, Query, UseGuards, Request, UseInterceptors, ParseFilePipeBuilder, UploadedFile, HttpStatus, Res } from '@nestjs/common';
+import { Response } from 'express';
 import { EventService } from './event.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
@@ -63,9 +64,20 @@ export class EventController {
     return this.eventService.updateEvent(+id, updateEventDto);
   }
 
-  // @Delete('removeEvent/:id')
-  // @Roles('super_admin', 'admin')
-  // removeEvent(@Param('id') id: string) {
-  //   return this.eventService.removeEvent(+id);
-  // }
+  @Get(':roomId')
+  CheckQrCode(
+    @Param('roomId') roomId: string,
+    @Query('tg') tg: string,
+    @Res() res: Response,
+  ) {
+    const now = Date.now();
+    const maxAge = 5 * 60 * 1000;
+
+    const timestamp = Number(tg);
+    if (!tg || isNaN(timestamp) || now - timestamp > maxAge) {
+      return res.redirect('http://localhost:3000/qr-expired');
+    }
+    const frontendUrl = `http://localhost:3000/poc/events/${roomId}/live`;
+    return res.redirect(302, frontendUrl);
+  }
 }

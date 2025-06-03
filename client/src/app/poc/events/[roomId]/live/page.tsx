@@ -12,7 +12,7 @@ import { getAssignments } from '@/store/pocAssignmentSlide';
 import { PocAssignmentType } from '@/types/pocTypes';
 import Image from 'next/image';
 import { PocLocation } from '@/types/eventTypes';
-import { set } from 'zod';
+import QRGenerator from '@/components/ui/Qrcode';
 export default function LivePage() {
   const { roomId } = useParams() as { roomId: string };
   const dispatch = useAppDispatch();
@@ -136,15 +136,15 @@ useEffect(() => {
       <div className="flex flex-col gap-4 md:flex-row md:gap-8">
         <div className="flex-1 space-y-4">
           <QueueCheckIn roomId={roomId} onCheckIn={handleNewQueueCheckIn} />
-          
+          <QRGenerator roomId={roomId} />
         </div>
         {floorPlanImageUrl && pocLocation && (
-          <div className="w-[500px] flex-shrink-0 relative border rounded overflow-hidden">
+          <div className="w-[500px] h-full flex-shrink-0 relative border rounded overflow-hidden">
             <Image
               src={floorPlanImageUrl}
-              alt="floor plan"
               width={500}
-              height={500}
+              height={300}
+              alt="floor plan"
               className="object-contain w-full h-auto"
             />
             <div

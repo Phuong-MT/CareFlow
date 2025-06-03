@@ -3,6 +3,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import {Button} from '@/components/ui/button';
+import QRScanner from '@/components/ui/ScanQrCode';
 
 export default function HomePage() {
   const router = useRouter();
@@ -47,6 +48,11 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+        </div>
+
+        <div>
+          <h2 className="text-2xl font-bold text-center my-8">Scan QR Code to Join Event</h2>
+          <QRScanner />
         </div>
 
         {/* Features section */}
