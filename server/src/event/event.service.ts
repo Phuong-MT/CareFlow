@@ -9,6 +9,7 @@ import { UsersService } from 'src/users/users.service';
 import {FloorPlan} from 'src/floorplan/entities/floorplan.entity'
 import { FloorplanService } from 'src/floorplan/floorplan.service';
 import { PocLocation } from 'src/poc-assignment/entities/poc-location.entity';
+import { Op } from 'sequelize';
 @Injectable()
 export class EventService {
   constructor(@InjectModel(Event) private eventModel: typeof Event,
@@ -57,9 +58,40 @@ export class EventService {
     return { events, total, page, limit };
   }
 
-  async findAllEventUserCanSee(page: number = 1, limit: number = 10): Promise<{ events: Event[]; total: number; page: number; limit: number }> {
+  async findAllEventUserCanSee(userId: string,page: number = 1, limit: number = 10): Promise<{ events: Event[]; total: number; page: number; limit: number }> {
     const offset = (page - 1) * limit;
-    const { rows: events, count: total } = await this.eventModel.findAndCountAll({ offset, limit });
+    const user = await this.usersService.findId(userId);
+    if (!user) throw new NotFoundException('User not found');
+    const tenantCode = user.tenantCode;
+    const date = new Date();
+    const { rows: events, count: total } = await this.eventModel.findAndCountAll({ offset, limit,
+      where:{
+        tenantCode,
+        dateStart: {
+          [Op.lte]: date
+        },
+        dateEnd: {
+          [Op.gte]: date
+        }
+      },
+      order: [['createdAt', 'DESC']],
+
+      include: [
+        {
+          model: Tenant,
+          attributes: ['name', 'tenantCode'],
+        },
+        {
+          model: Location,
+          attributes: ['id', 'name', 'address'],
+        },
+        {
+          model: FloorPlan,
+          attributes: ['id', 'name', 'floorPlanImageUrl'],
+          include: [{ model: PocLocation, attributes: ['id', 'name', 'x', 'y','floorPlanId'] }],
+        }
+      ],
+     });
     return { events, total, page, limit };
   }
 

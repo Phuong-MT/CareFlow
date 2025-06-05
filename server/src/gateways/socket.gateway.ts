@@ -137,4 +137,18 @@ import { subscribe } from 'diagnostics_channel';
     const updatedQueue = await this.queueService.getQueueState({tenantCode, eventId, locationId});
     this.server.to(roomId).emit(SocketState.QUEUE_STATE_UPDATE, { updatedQueue });
   }
+ 
+   @SubscribeMessage(SocketState.HANDLE_CANCEL)
+  async handleCancel(
+    @MessageBody() data: {queueId: number ; tenantCode: string; eventId: string; locationId: string, pocLocationId: number},
+    @ConnectedSocket() client: Socket,
+  ) {
+    const { queueId, tenantCode, eventId, locationId, pocLocationId } = data;
+    console.log(data)
+    const roomId = `${tenantCode}:${eventId}:${locationId}`;
+    this.logger.log(`Client ${client.id} handled cancel for queue ${queueId}`);
+    await this.queueService.updateStatus(queueId,pocLocationId ,QueueEnum.IS_CLOSED)
+    const updatedQueue = await this.queueService.getQueueState({tenantCode, eventId, locationId});
+    this.server.to(roomId).emit(SocketState.QUEUE_STATE_UPDATE, { updatedQueue });
+  }
 }

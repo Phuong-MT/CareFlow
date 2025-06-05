@@ -26,5 +26,6 @@ export enum SocketHeader{
     CALL_NEXT_ERROR = 'call_next_error',
     HANDLE_SUCCESS = 'handle_success',
     HANDLE_ERROR = 'handle_error',
+    HANDLE_CANCEL = 'handle_cancel',
 }
 

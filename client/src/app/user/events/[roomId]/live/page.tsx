@@ -50,6 +50,7 @@ useEffect(() => {
         `${process.env.NEXT_PUBLIC_SERVER_URL}${pocAssignment.event.floorPlan.floorPlanImageUrl}`
       );
       setPocLocation(pocAssignment.pocLocation);
+      setIdServing(pocAssignment.pocLocation.id);
     }
   }
 }, [dataPocAssignment, roomId]);
@@ -121,34 +122,13 @@ useEffect(() => {
     NewQueueCheckIn(newUser);
   };
   
-  useEffect(() => {
-    const [tenantCode, eventId, locationId, pocLocationId] = decodeURIComponent(roomId).split(':');
 
-    if (queueState.length > 0) {
-      let found = false;
-
-      for (let i = 0; i < queueState.length; i++) {
-        const item = queueState[i];
-        if (
-          item.status === 'serving' &&
-          item.pocLocationId === Number(pocLocationId)
-        ) {
-          setIdServing(item.id);
-          found = true;
-          break;
-        }
-      }
-
-      setIsServing(found);
-    }
-  }, [queueState, roomId]);
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Live Queue Status</h1>
       <div className="flex flex-col gap-4 md:flex-row md:gap-8">
         <div className="flex-1 space-y-4">
           <QueueCheckIn roomId={roomId} onCheckIn={handleNewQueueCheckIn} />
-          <QRGenerator roomId={roomId} />
         </div>
         {floorPlanImageUrl && pocLocation && (
           <div className="w-[500px] h-full flex-shrink-0 relative border rounded overflow-hidden">
@@ -174,49 +154,6 @@ useEffect(() => {
           </div>
         )}
       </div>
-      <Button
-        onClick={()=>{
-          const socket = getSocket();
-          if (socket) {
-            const [tenantCode, eventId, locationId, pocLocationId] = decodeURIComponent(roomId).split(':');
-            console.log(pocLocationId)
-            socket.emit(SocketHeader.CALL_NEXT, { tenantCode, eventId, locationId, pocLocationId }); 
-            // setIsServing(true);
-          }
-        }}
-        disabled={isServing}
-      > Phục vụ </Button>
-      <Button
-          className="bg-green-500 text-white"
-          onClick={() => {
-            const socket = getSocket();
-            if (socket && IdServing && pocLocation?.id) { 
-              const [tenantCode, eventId, locationId] = decodeURIComponent(roomId).split(':');
-              console.log(`IdServing: ${IdServing}, pocLocationId: ${pocLocation.id}, tenantCode: ${tenantCode}, eventId: ${eventId}, locationId: ${locationId}`);
-              socket.emit(SocketHeader.HANDLE_SUCCESS, { queueId: IdServing, tenantCode, eventId, locationId, pocLocationId: pocLocation.id });
-              setIsServing(false);
-              setIdServing(null);
-            }
-          }}
-          disabled={!isServing}
-        >
-          Đã xong
-        </Button>
-      <Button
-        className="bg-red-500 text-white"
-        onClick={()=>{
-          const socket = getSocket();
-          if (socket && IdServing && pocLocation?.id) {
-            const [tenantCode, eventId, locationId] = decodeURIComponent(roomId).split(':');
-            socket.emit(SocketHeader.HANDLE_CANCEL, {queueId: IdServing, tenantCode, eventId, locationId, pocLocationId: pocLocation.id  });
-            setIsServing(false);
-            setIdServing(null);
-          }
-        }}
-        disabled={!isServing}
-        >
-          Hủy phục vụ
-      </Button>
       <div className="bg-white shadow-md rounded-xl p-4">
         {queueState.length === 0 ? (
           <p className="text-gray-500">Không có người nào trong hàng chờ.</p>

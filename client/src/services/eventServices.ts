@@ -14,7 +14,19 @@ export const apiGetAllEvents = async(payload: EventRequest) => {
       throw error;
     }
   }
-
+export const apiGetAllEventsUserCanSee = async(payload: EventRequest) => {
+  try {
+    const response = await api.get("/events/findAllEventUserCanSee",
+       {
+      params:{page: payload.page||1, limit: payload.limit||10}
+     }
+  );
+    return response;
+  } catch (error) {
+    console.error("Get all events user can see error:", error);
+    throw error;
+  }
+}
 
 export const apiGetFindOneEvent = async(payload : any) => {
   try{

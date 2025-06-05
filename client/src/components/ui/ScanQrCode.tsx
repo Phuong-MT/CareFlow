@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { useRouter } from 'next/navigation';
-
+import api from '@/utils/axiosConfig'
 export enum Html5QrcodeSupportedFormats {
   QR_CODE = 0,
   AZTEC,
@@ -29,57 +29,44 @@ const QRScanner: React.FC = () => {
     const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
     
     const startScanning = async () => {
-        if (scanning) return;
+      if (scanning) return;
+      setScanning(true);
 
-    setScanning(true);
-    const qrRegionId = "qr-reader";
+      setTimeout(async () => {
+        html5QrCodeRef.current = new Html5Qrcode("qr-reader");
 
-    html5QrCodeRef.current = new Html5Qrcode( "reader",{ formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ], verbose: false });
-    const devices = await Html5Qrcode.getCameras();
-    const cameraId = devices[0]?.id;
+        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
 
-    if (!cameraId) {
-      alert("Không tìm thấy camera");
-      return;
-    }
+        await html5QrCodeRef.current.start(
+          { facingMode: "user" },
+          config,
+          async (decodedText, decodedResult) => {
+            await html5QrCodeRef.current?.stop();
+            setScanning(false);
 
-    html5QrCodeRef.current.start(
-      cameraId,
-      { fps: 10, qrbox: { width: 250, height: 250 } },
-      async (decodedText) => {
-        console.log("QR code detected:", decodedText);
-        await html5QrCodeRef.current?.stop();
-        setScanning(false);
+            try {
+              const url = new URL(decodedText);
+              const roomId = url.pathname.split("/").pop()?.split("?")[0];
+              const tg = url.searchParams.get("tg");
 
-        try {
-          const url = new URL(decodedText);
-          const roomId = url.pathname.split("/").pop()?.split("?")[0];
-          const tg = url.searchParams.get("tg");
-          const token = localStorage.getItem("token");
-
-          if (!roomId || !tg || !token) throw new Error("Thiếu dữ liệu");
-
-          const res = await fetch(
-            `${process.env.NEXT_PUBLIC_SERVER_URL}/events/${roomId}?tg=${tg}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
+              if (!roomId || !tg) throw new Error("Thiếu dữ liệu");
+              const res = await api.get(`/events/${roomId}?tg=${tg}`)
+              if(res.data.valid){
+                router.push(res.data.redirectUrl);
+              }else{
+                alert("QR không hợp lệ hoặc hết hạn.");
+              }
+            } catch (err) {
+              alert("QR không hợp lệ hoặc hết hạn.");
             }
-          );
+          },
+          (errorMessage) => {
+            console.warn("QR Scan error", errorMessage);
+          }
+        );
+      }, 100);
+    };
 
-          if (!res.ok) throw new Error("QR không hợp lệ");
-
-          router.push(`/admin/events/${roomId}/live`);
-        } catch (err) {
-          alert("QR không hợp lệ hoặc hết hạn.");
-        }
-      },
-      (errorMessage) => {
-        console.warn("QR Scan error", errorMessage);
-      }
-    );
-  };
 
   const stopScanning = async () => {
     if (html5QrCodeRef.current && scanning) {

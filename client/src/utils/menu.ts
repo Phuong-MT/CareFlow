@@ -144,3 +144,49 @@ export const MenuSidebarPoc = {
   projects: [
   ],
 }
+
+export const MenuSidebarUser = {
+  user: {
+    name: "shadcn",
+    email: "m@example.com",
+    avatar: "https://github.com/shadcn.png",
+  },
+  teams: [
+    {
+      name: "Acme Inc",
+      logo: GalleryVerticalEnd,
+      plan: "Enterprise",
+    },
+    {
+      name: "Acme Corp.",
+      logo: AudioWaveform,
+      plan: "Startup",
+    },
+    {
+      name: "Evil Corp.",
+      logo: Command,
+      plan: "Free",
+    },
+  ],
+  navMain: [
+    {
+      title: "Event",
+      url: "/user/events",
+      icon: BookOpen,
+      isActive: true,
+      items: [
+        {
+           title: "Event List",
+          url: "/",
+        },
+      ]
+    },
+  ],
+  projects: [
+    {
+      name: "Profile",
+      url: "/user/profile",
+      icon: Bot,
+    },
+  ],
+}

@@ -9,14 +9,14 @@ import { JwtAuthGuard } from 'src/users/passport/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-
+import { RoleEnum } from 'src/common/commonEnum';
 @Controller('events')
 @UseGuards(JwtAuthGuard,RolesGuard)
 export class EventController {
   constructor(private readonly eventService: EventService) {}
 
   @Post('createEvent')
-  @Roles('super_admin', 'admin')
+  @Roles(RoleEnum.SUPER_ADMIN, RoleEnum.ADMIN)
   @UseInterceptors(FileInterceptor('floorPlanImage', {
       storage: diskStorage({
         destination: './uploads/floorplans',
@@ -39,15 +39,14 @@ export class EventController {
   }
 
   @Get('findAllEvent')
-  @Roles('super_admin', 'admin')
   findAllEvent(@Request() req: any,@Query('page') page: number = 1, @Query('limit') limit: number = 10) {
     console.log(req.user);
     return this.eventService.findAllEvent(req.user.id, +page, +limit);
   }
-
+  @Roles(RoleEnum.USER, RoleEnum.SUPER_ADMIN, RoleEnum.ADMIN)
   @Get('findAllEventUserCanSee')
-  findAllEventUserCanSee(@Query('page') page: number = 1, @Query('limit') limit: number = 10) {
-    return this.eventService.findAllEventUserCanSee(page, limit);
+  findAllEventUserCanSee(@Request() req: any, @Query('page') page: number = 1, @Query('limit') limit: number = 10) {
+    return this.eventService.findAllEventUserCanSee(req.user.id, page, limit);
   }
 
   @Get('findOneEvent/:id')
@@ -67,17 +66,24 @@ export class EventController {
   @Get(':roomId')
   CheckQrCode(
     @Param('roomId') roomId: string,
-    @Query('tg') tg: string,
-    @Res() res: Response,
+    @Query('tg') tg: string
   ) {
     const now = Date.now();
     const maxAge = 5 * 60 * 1000;
 
     const timestamp = Number(tg);
     if (!tg || isNaN(timestamp) || now - timestamp > maxAge) {
-      return res.redirect('http://localhost:3000/qr-expired');
+      return {
+        error: 'QR code expired or invalid',
+        valid: false,
+        redirectUrl: `/poc/events/${roomId}/live?error=expired`,
+      }
     }
-    const frontendUrl = `http://localhost:3000/poc/events/${roomId}/live`;
-    return res.redirect(302, frontendUrl);
+    const frontendUrl = `/poc/events/${roomId}/live`;
+    return {
+      error: null,
+      valid: true,
+      redirectUrl : `${frontendUrl}`,
+    }
   }
 }
