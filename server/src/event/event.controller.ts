@@ -76,10 +76,10 @@ export class EventController {
       return {
         error: 'QR code expired or invalid',
         valid: false,
-        redirectUrl: `/poc/events/${roomId}/live?error=expired`,
+        redirectUrl: `/user/events/${roomId}/live?error=expired`,
       }
     }
-    const frontendUrl = `/poc/events/${roomId}/live`;
+    const frontendUrl = `user/events/${roomId}/live`;
     return {
       error: null,
       valid: true,

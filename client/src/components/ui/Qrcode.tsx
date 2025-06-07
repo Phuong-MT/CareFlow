@@ -15,7 +15,7 @@ const QRGenerator: React.FC<QRGeneratorProps> = ({ roomId }) => {
     const tg = Date.now();
     setTimestamp(tg);
     //console.log(`${process.env.NEXT_PUBLIC_SERVER_URL}/events/${tenantCode}:${eventId}:${locationId}:${pocLocationId}?tg=${tg}`);
-    const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/events/${tenantCode}:${eventId}:${locationId}:${pocLocationId}?tg=${tg}`;
+    const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/events/${tenantCode}:${eventId}:${locationId}?tg=${tg}`;
     setQrValue(url);
     setTimeLeft(300);
 };

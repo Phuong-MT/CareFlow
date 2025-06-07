@@ -121,7 +121,7 @@ export class FloorplanService {
           name: poc.name,
           x: poc.x,
           y: poc.y,
-          floorPlanId: poc.floorPlanId,
+          floorPlanId: floorPlanId,
         });
         updatedPocs.push(newPoc);
       }

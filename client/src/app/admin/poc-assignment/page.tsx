@@ -30,7 +30,6 @@ export default function AssignPocPage() {
   useEffect(() => {
     dispatch(getPocUser())
     dispatch(getAllEvents({ tenantCode, page, limit } as EventRequest))
-
   }, [dispatch, tenantCode, page])
 
   const selectedEvent = events ? events.find(ev => ev.id === selectedEventId) : undefined

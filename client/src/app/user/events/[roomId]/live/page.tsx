@@ -23,43 +23,11 @@ export default function LivePage() {
   const [floorPlanImageUrl, setFloorPlanImageUrl] = useState('');
   const [pocLocation, setPocLocation] = useState<PocLocation>();
   const [IdServing, setIdServing] = useState<number | null>(null);
-  useEffect(() => {
-    const fetchData = async ()=>{
-      await dispatch(getAssignments())
-    }
-    fetchData();
-  }, [dispatch])
-
-useEffect(() => {
-  const [tenantCode, eventIdStr, locationIdStr, pocLocationIdStr] = decodeURIComponent(roomId).split(':');
-
-  const eventId = Number(eventIdStr);
-  const locationId = Number(locationIdStr);
-  const pocLocationId = Number(pocLocationIdStr);
-
-  if (dataPocAssignment) {
-    const pocAssignment = (dataPocAssignment).find(
-      (assignment) =>
-        assignment.event.id === eventId &&
-        assignment.location.id === locationId &&
-        assignment.pocLocation.id === pocLocationId
-    );
-
-    if (pocAssignment) {
-      setFloorPlanImageUrl(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}${pocAssignment.event.floorPlan.floorPlanImageUrl}`
-      );
-      setPocLocation(pocAssignment.pocLocation);
-      setIdServing(pocAssignment.pocLocation.id);
-    }
-  }
-}, [dataPocAssignment, roomId]);
-
 
   useEffect(() => {
       if (!roomId || !token) return;
 
-      const [tenantCode, eventId, locationId, pocLocationId] = decodeURIComponent(roomId).split(':');
+      const [tenantCode, eventId, locationId] = decodeURIComponent(roomId).split(':');
 
       try {
         connectSocket(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:8080', token);
@@ -94,11 +62,6 @@ useEffect(() => {
         dispatch(addQueueState(queueData))
       });
 
-      socket.off(SocketHeader.CALL_NEXT_ERROR);
-      socket.on(SocketHeader.CALL_NEXT_ERROR, (error: string)=>{
-        alert('call next error: '+error);
-      });
-
       socket.off(SocketHeader.CALL_NEXT_SUCCESS);
       socket.on(SocketHeader.CALL_NEXT_SUCCESS, (queueData: {
          data: {
@@ -121,56 +84,25 @@ useEffect(() => {
   const handleNewQueueCheckIn = (newUser: { name: string; tenantCode: string; eventId: string; locationId: string }) => {
     NewQueueCheckIn(newUser);
   };
-  
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Live Queue Status</h1>
-      <div className="flex flex-col gap-4 md:flex-row md:gap-8">
-        <div className="flex-1 space-y-4">
-          <QueueCheckIn roomId={roomId} onCheckIn={handleNewQueueCheckIn} />
-        </div>
-        {floorPlanImageUrl && pocLocation && (
-          <div className="w-[500px] h-full flex-shrink-0 relative border rounded overflow-hidden">
-            <Image
-              src={floorPlanImageUrl}
-              width={500}
-              height={300}
-              alt="floor plan"
-              className="object-contain w-full h-auto"
-            />
-            <div
-              key={pocLocation.id}
-              className="absolute w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs"
-              style={{
-                top: `${pocLocation.y}%`,
-                left: `${pocLocation.x}%`,
-                transform: 'translate(-50%, -50%)',
-              }}
-              title={pocLocation.name}
-            >
-              {pocLocation.name}
-            </div>
-          </div>
-        )}
-      </div>
+
+      <QueueCheckIn roomId={roomId} onCheckIn={handleNewQueueCheckIn} /> 
+
       <div className="bg-white shadow-md rounded-xl p-4">
         {queueState.length === 0 ? (
           <p className="text-gray-500">Không có người nào trong hàng chờ.</p>
         ) : (
           <ul className="space-y-2">
-            {queueState.length > 0&&queueState.map((item, index) => (
+            {queueState.map((item, index) => (
               <li
                 key={item.userId || index}
                 className="p-3 bg-blue-50 rounded-lg flex justify-between items-center"
               >
                 <span className="font-medium">{item.nameUser}</span>
                 <span className="text-sm text-gray-600">STT: {item.position}</span>
-                <span>
-                  {item.status === 'pending' &&<span className="text-yellow-500">Đang chờ</span>}
-                  {item.status === 'serving' &&<span className="text-green-500">Đang phục vụ</span>}
-                </span>
-
               </li>
             ))}
           </ul>

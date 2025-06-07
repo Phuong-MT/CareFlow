@@ -142,6 +142,7 @@ export const EventDetailPage = ({ eventCode }: EventProps) => {
       }
       setIsFloorPlanChanged(true)
   }
+  console.log(markedPoints)
   return (
     <div className="space-y-4">
       <Card className="p-4">

@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image'
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import { Badge } from '@/components/ui/badge';
+import { EventStatus } from '@/types/eventTypes';
 
 export default function PocAssignmentList() {
   const dispatch = useAppDispatch()
@@ -20,6 +22,26 @@ export default function PocAssignmentList() {
     return date.toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' })
   }
   
+  const getEventStatus = (startTime: string, endTime: string): EventStatus => {
+    const start = new Date(startTime).getTime();
+    const end = new Date(endTime).getTime();
+    const now = new Date().getTime();
+    if (now < start) return 'upcoming';
+    if (now > end) return 'ended';
+    return 'ongoing';
+  };
+
+  const renderBadge = (status: EventStatus) => {
+    switch (status) {
+      case 'ended':
+        return <Badge variant="destructive">Đã kết thúc</Badge>;
+      case 'ongoing':
+        return <Badge variant="default" className="bg-green-600">Đang diễn ra</Badge>;
+      case 'upcoming':
+        return <Badge variant="outline" className="text-blue-600 border-blue-400">Sắp diễn ra</Badge>;
+    }
+  };
+
   if (status === 'loading') return <p>Đang tải dữ liệu POC...</p>;
   if (error) return <p className="text-red-500">Lỗi: {error}</p>;
   
@@ -28,13 +50,17 @@ export default function PocAssignmentList() {
       <h1 className="text-2xl font-bold">Sự kiện bạn được phân công</h1>
 
       {dataPocAssignment.map((assignment) => {
+         const status = getEventStatus(assignment.event.dateStart, assignment.event.dateEnd); 
         const { event, location, pocLocation } = assignment
         const floorPlanUrl = `${process.env.NEXT_PUBLIC_SERVER_URL}${event.floorPlan.floorPlanImageUrl}`
 
         return (
         <Card className="p-4" key={assignment.id}>
-          <CardHeader>
-            <CardTitle>{assignment.event.title}</CardTitle>
+          <CardHeader >
+            <div className="flex flex-row space-y-0 pb-2">
+              <CardTitle>{assignment.event.title}</CardTitle>
+              {renderBadge(status)}
+            </div>
             <div className="text-sm">
               <p>{assignment.location.name}</p>
               <p>Thời gian: {formatTime(assignment.event.dateStart)} - {formatTime(assignment.event.dateEnd)}</p>
@@ -77,12 +103,15 @@ export default function PocAssignmentList() {
               </div>
             </div>
           </CardContent>
-          <Button
+          {status !== 'ended' &&(
+            <Button
             onClick={()=>{
               const roomId = `${event.tenantCode}:${event.id}:${event.locationId}:${assignment.pocLocation.id}`;
               router.push(`/poc/events/${roomId}/live`);
             }}
-          > xem chi tiet</Button>
+          > xem chi tiết</Button>
+          )
+        }
         </Card>
         )
       })}
