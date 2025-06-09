@@ -7,22 +7,17 @@ import { JoinRoom, NewQueueCheckIn, connectSocket, disconnectSocket, getSocket }
 import { addQueueState, setConnected, setQueueState } from '@/store/socketSlide';
 import { ResponseQueue, SocketHeader } from '@/types/socketTypes';
 import QueueCheckIn from '@/components/admin/handle-checkin';
-import { Button } from '@/components/ui/button';
-import { getAssignments } from '@/store/pocAssignmentSlide';
 import { PocAssignmentType } from '@/types/pocTypes';
 import Image from 'next/image';
 import { PocLocation } from '@/types/eventTypes';
-import QRGenerator from '@/components/ui/Qrcode';
+import api from '@/utils/axiosConfig';
 export default function LivePage() {
   const { roomId } = useParams() as { roomId: string };
   const dispatch = useAppDispatch();
   const {queueState } = useAppSelector((state) => state.socket);
   const token = useAppSelector((state) => state.user.access_token);
-  const [isServing, setIsServing] = useState(false);
-  const dataPocAssignment = useAppSelector(state => state.poc.dataPocAssignment) as PocAssignmentType[]
   const [floorPlanImageUrl, setFloorPlanImageUrl] = useState('');
-  const [pocLocation, setPocLocation] = useState<PocLocation>();
-  const [IdServing, setIdServing] = useState<number | null>(null);
+  const [pocLocation, setPocLocation] = useState<PocLocation[]>();
 
   useEffect(() => {
       if (!roomId || !token) return;
@@ -85,24 +80,75 @@ export default function LivePage() {
     NewQueueCheckIn(newUser);
   };
 
+
+  useEffect(()=>{
+    const fd = async()=>{
+      const [tenantCode, eventId, locationId] = decodeURIComponent(roomId).split(':');
+      const response = await api.get(`floor-plan/${eventId}`);
+      if(response.status === 200){
+        setFloorPlanImageUrl(`${process.env.NEXT_PUBLIC_SERVER_URL}${response.data.floorPlanImageUrl}`)
+        setPocLocation(response.data.pocLocations);
+      }
+    }
+    fd()
+  },[roomId])
+
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Live Queue Status</h1>
 
-      <QueueCheckIn roomId={roomId} onCheckIn={handleNewQueueCheckIn} /> 
+      <div className="flex flex-col gap-4 md:flex-row md:gap-8">
+        <div className="flex-1 space-y-4">
+          <QueueCheckIn roomId={roomId} onCheckIn={handleNewQueueCheckIn} />
+        </div>
+         {floorPlanImageUrl && (
+          <div className="w-[500px] h-full flex-shrink-0 relative border rounded overflow-hidden">
+            <Image
+              src={floorPlanImageUrl}
+              width={500}
+              height={300}
+              alt="floor plan"
+              className="object-contain w-full h-auto"
+            />
+            {pocLocation && pocLocation.map((poc)=>{
+              return (
+                <div
+                  key={poc.id}
+                  className="absolute w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs"
+                  style={{
+                    top: `${poc.y}%`,
+                    left: `${poc.x}%`,
+                    transform: 'translate(-50%, -50%)',
+                  }}
+                  title={poc.name}
+                  >
+                  {poc.name}
+                </div>
+              )
+                                  
+            })}
+          </div>
+        )}
+      </div>
 
       <div className="bg-white shadow-md rounded-xl p-4">
         {queueState.length === 0 ? (
           <p className="text-gray-500">Không có người nào trong hàng chờ.</p>
         ) : (
           <ul className="space-y-2">
-            {queueState.map((item, index) => (
+            {queueState.length > 0&&queueState.map((item, index) => (
               <li
                 key={item.userId || index}
                 className="p-3 bg-blue-50 rounded-lg flex justify-between items-center"
               >
                 <span className="font-medium">{item.nameUser}</span>
                 <span className="text-sm text-gray-600">STT: {item.position}</span>
+                <span>
+                  {item.status === 'pending' &&<span className="text-yellow-500">Đang chờ</span>}
+                  {item.status === 'serving' &&<span className="text-green-500">Đang phục vụ</span>}
+                </span>
+
               </li>
             ))}
           </ul>

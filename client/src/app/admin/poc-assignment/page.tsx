@@ -45,7 +45,7 @@ export default function AssignPocPage() {
     try {
       setLoading(true)
       const res = await api.post(`/poc-assignment/userId/${selectedUserId}/event/${selectedEventId}/location/${locationId}/assign/${selectedPocLocationId}`)
-      if(res.status === 200){
+      if(res.status === 201){
         alert('Phân công thành công!')
         setSelectedUserId(undefined)
         setSelectedEventId(undefined)

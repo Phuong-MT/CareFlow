@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/hooks/config';
 import { JoinRoom, NewQueueCheckIn, connectSocket, disconnectSocket, getSocket } from '@/services/socketServices';
-import { addQueueState, setConnected } from '@/store/socketSlide';
+import { addQueueState, setConnected, setQueueState } from '@/store/socketSlide';
 import { ResponseQueue, SocketHeader } from '@/types/socketTypes';
 import QueueCheckIn from '@/components/admin/handle-checkin';
 import QRGenerator from '@/components/ui/Qrcode';
@@ -64,17 +64,36 @@ export default function LivePage() {
     // };
   }, [roomId, token, dispatch]);
   const socket = getSocket()
-  useEffect(() => {
-    if(socket){
-      socket.off(SocketHeader.NEW_QUEUE_RECEIVED);
-      socket.on(SocketHeader.NEW_QUEUE_RECEIVED, (queueData: ResponseQueue) => {
-        dispatch(addQueueState(queueData))
-      });
-    }
-  }, [socket]);
-  const handleNewQueueCheckIn = (newUser: { name: string; tenantCode: string; eventId: string; locationId: string }) => {
-    NewQueueCheckIn(newUser);
-  };
+    useEffect(() => {
+      const socket = getSocket()
+      if(socket){
+        socket.off(SocketHeader.NEW_QUEUE_RECEIVED);
+        socket.on(SocketHeader.NEW_QUEUE_RECEIVED, (queueData: ResponseQueue) => {
+          dispatch(addQueueState(queueData))
+        });
+  
+        socket.off(SocketHeader.CALL_NEXT_SUCCESS);
+        socket.on(SocketHeader.CALL_NEXT_SUCCESS, (queueData: {
+           data: {
+            userId: string,
+            nameUser: string,
+            pocLocationId?: number,
+            message: string,
+          }
+        }) => {
+          setTimeout(()=>{
+            alert(`Thông báo userId: ${queueData.data.userId}, Bạn : ${queueData.data.nameUser}, Vui lòng di chuyển tới vị trí: ${queueData.data.pocLocationId}, ${queueData.data.message}`);
+          }, 1000);
+        });
+        socket.off(SocketHeader.QUEUE_STATE_UPDATE);
+        socket.on(SocketHeader.QUEUE_STATE_UPDATE, (updatedQueue: ResponseQueue[]) => {
+          dispatch(setQueueState(updatedQueue));
+        });
+      }
+    }, [roomId, token]);
+    const handleNewQueueCheckIn = (newUser: { name: string; tenantCode: string; eventId: string; locationId: string }) => {
+      NewQueueCheckIn(newUser);
+    };
 
   return (
     <div className="p-6">
@@ -113,18 +132,23 @@ export default function LivePage() {
           </div>
         )}
       </div>
-      <div className="bg-white shadow-md rounded-xl p-4">
+     <div className="bg-white shadow-md rounded-xl p-4">
         {queueState.length === 0 ? (
           <p className="text-gray-500">Không có người nào trong hàng chờ.</p>
         ) : (
           <ul className="space-y-2">
-            {queueState.map((item, index) => (
+            {queueState.length > 0&&queueState.map((item, index) => (
               <li
                 key={item.userId || index}
                 className="p-3 bg-blue-50 rounded-lg flex justify-between items-center"
               >
                 <span className="font-medium">{item.nameUser}</span>
                 <span className="text-sm text-gray-600">STT: {item.position}</span>
+                <span>
+                  {item.status === 'pending' &&<span className="text-yellow-500">Đang chờ</span>}
+                  {item.status === 'serving' &&<span className="text-green-500">Đang phục vụ</span>}
+                </span>
+
               </li>
             ))}
           </ul>
