@@ -135,7 +135,8 @@ import { subscribe } from 'diagnostics_channel';
     this.logger.log(`Client ${client.id} handled success for queue ${queueId}`);
     await this.queueService.updateStatus(queueId,pocLocationId ,QueueEnum.SUCCESS)
     const updatedQueue = await this.queueService.getQueueState({tenantCode, eventId, locationId});
-    this.server.to(roomId).emit(SocketState.QUEUE_STATE_UPDATE, { updatedQueue });
+    console.log(updatedQueue)
+    this.server.to(roomId).emit(SocketState.QUEUE_STATE_UPDATE, updatedQueue);
   }
  
    @SubscribeMessage(SocketState.HANDLE_CANCEL)
@@ -149,6 +150,6 @@ import { subscribe } from 'diagnostics_channel';
     this.logger.log(`Client ${client.id} handled cancel for queue ${queueId}`);
     await this.queueService.updateStatus(queueId,pocLocationId ,QueueEnum.IS_CLOSED)
     const updatedQueue = await this.queueService.getQueueState({tenantCode, eventId, locationId});
-    this.server.to(roomId).emit(SocketState.QUEUE_STATE_UPDATE, { updatedQueue });
+    this.server.to(roomId).emit(SocketState.QUEUE_STATE_UPDATE, updatedQueue);
   }
 }

@@ -48,7 +48,7 @@ export default function LivePage() {
     //     socket.off(SocketHeader.NEW_QUEUE_RECEIVED);
     //   }
     // };
-  }, [roomId, token, dispatch]);
+  }, [roomId, token]);
   useEffect(() => {
     const socket = getSocket()
     if(socket){

@@ -62,7 +62,7 @@ export default function LivePage() {
     //     socket.off(SocketHeader.NEW_QUEUE_RECEIVED);
     //   }
     // };
-  }, [roomId, token, dispatch]);
+  }, [roomId, token]);
   const socket = getSocket()
     useEffect(() => {
       const socket = getSocket()

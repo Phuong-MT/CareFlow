@@ -104,22 +104,13 @@ export default function EventsPageUser() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => router.push(`/admin/events/${roomId}/live`)}
+                          onClick={() => router.push(`/user/events/${roomId}/live`)}
                         >
                           Xem Realtime
                         </Button>
                       </div>
                       
                     )}
-                    <div className="pt-3">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => router.push(`/admin/events/${roomId}/event-detail`)}
-                        >
-                          Xem chi tiết
-                        </Button>
-                      </div>
                     </div>
                   </CardContent>
                 </Card>
